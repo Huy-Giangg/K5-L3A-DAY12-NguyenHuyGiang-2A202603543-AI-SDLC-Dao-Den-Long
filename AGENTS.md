@@ -1,9 +1,9 @@
-﻿# AGENTS.md
+# AGENTS.md
 
 ## Lệnh dự án
 - Cài đặt thư viện: `pip install -r requirements.txt`
 - Chạy toàn bộ kiểm thử tự động: `pytest`
-- Chạy headless (Test Contract v1.1): `python -m src.main --headless --night 1 --ticks 60 --out test.jsonl`
+- Chạy headless (Test Contract v1.2): `python -m src.main --headless --night 1 --ticks 60 --out test.jsonl`
 - Chạy game trực quan 3D: `python -m src.main`
 
 ## Quy ước kiến trúc
@@ -15,5 +15,5 @@
 ## Quy tắc bắt buộc
 - Tuyệt đối không commit API key, token bí mật hoặc file `.env`.
 - Không giả mạo kết quả test hay sửa tay file log bằng chứng.
-- Mọi giả định kỹ thuật hoặc điểm thay thế luật phải ghi rõ ràng vào `docs/notes/assumptions.md`.
-- Khi yêu cầu thay đổi (như các Ticket), test cũ bị ảnh hưởng phải được cập nhật kèm lý do cụ thể.
+- Mọi giả định kỹ thuật hoặc điểm thay thế luật phải ghi rõ ràng vào `docs/notes/assumptions.md` và `docs/adr/`.
+- Khi yêu cầu thay đổi (như các Ticket), test cũ bị ảnh hưởng phải được cập nhật kèm lý do cụ thể, ghi nhận vào `CHANGELOG.md`.

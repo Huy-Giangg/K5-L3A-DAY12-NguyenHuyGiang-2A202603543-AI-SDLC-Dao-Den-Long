@@ -8,7 +8,7 @@ def test_contract_json_schema():
     assert os.path.exists("game.contract.json")
     with open("game.contract.json", "r", encoding="utf-8") as f:
         data = json.load(f)
-    assert data["contract_version"] in ["1.0", "1.1"]
+    assert data["contract_version"] in ["1.0", "1.1", "1.2"]
     assert "tuning" in data
     tuning = data["tuning"]
     assert tuning["lantern_count_night1"] == 5
@@ -17,10 +17,10 @@ def test_contract_json_schema():
     assert "lantern_cost" in tuning
     assert "safe_radius" in tuning
     assert "score" in tuning
-    # v1.1 fields
+    # v1.1 & v1.2 fields
     assert "dash_speed" in tuning
-    assert "dash_duration_s" in tuning
-    assert "dash_cooldown_s" in tuning
+    assert "fuel_max" in tuning
+    assert "relight_cost" in tuning
 
 def test_headless_basic_run(tmp_path):
     out_file = str(tmp_path / "out.jsonl")

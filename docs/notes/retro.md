@@ -2,34 +2,27 @@
 
 ---
 
-## Đánh giá Phase 1 (PRD-0)
-*(Xem chi tiết tại commit tag `phase-1`)*
-- Đạt chuẩn Test Contract v1.0.
-- Decoupled architecture hoạt động ổn định.
-- Vượt qua 15/15 test cases ban đầu.
+## Đánh giá Phase 1 (PRD-0) & Phase 2 (TICKET-02)
+*(Xem chi tiết tại các tag `phase-1` và `phase-2`)*
+- Hoàn thành đầy đủ lõi engine, giao diện 3D và Test Contract v1.0, v1.1.
+- Xây dựng 24 unit & scenario tests ban đầu.
 
 ---
 
-## Đánh giá Phase 2 (TICKET-02: Ba Hòn Đảo)
+## Đánh giá Phase 3 (TICKET-03: Đèn Cạn Dầu)
 
 ### 1. Những gì đạt được
-- **Đạt chuẩn 100% Test Contract v1.1:**
-  - `game.contract.json` được cập nhật đồng bộ toàn bộ tham số chuẩn hóa (`contract_version: "1.1"`).
-  - Hỗ trợ tham số `--night 1`, `--night 2`, `--night 3`.
-  - Bổ sung sự kiện khởi đầu `night_start {"night": n}`.
-  - Snapshot gốc bổ sung các trường: `night`, `wind`, `player.vel`, `player.grounded`, `player.invuln`, `player.dash_cd_s`, `player.pulse_cd_s`, `player.charm_s`, cùng các mảng bắt buộc `motes`, `drifters`, `charms`.
-  - Bổ sung đầy đủ các sự kiện mới: `dash`, `charm_picked`, `drifter_steal`, `drifter_drop`, `paused`, `resumed`, và `player_hit` bổ sung trường `lost` khi rơi xuống vực.
-- **Mở rộng thế giới 3 Đêm & Cơ chế nâng cấp:**
-  - Bản đồ Đêm 1: Đảo Bến chuẩn hóa (R=40m, 5 đèn, 24 điểm đom đóm, 12 điểm bóng mực).
-  - Bản đồ Đêm 2: Đảo Cau (2 đảo R=28m, cầu tre, bục nhảy parabol, Bùa Gió C1, 6 đèn).
-  - Bản đồ Đêm 3: Đảo Chuông (3 tầng, dốc leo $30^\circ$ và $150^\circ$, bục nhảy lên tầng 2, tháp chuông cản đường, gió mạnh 30s thổi 5s, 7 đèn).
-  - Cơ chế Gió Lạc (Drifter) và Bùa Gió (Charm) hoạt động chính xác theo 12 bước tick chuẩn.
-- **Hiệu năng xuất sắc:**
-  - Chạy mô phỏng 1 Đêm đầy đủ ($21.600$ ticks ở 60Hz) chỉ trong **~2.1 giây** trên máy thực tế, đạt ngưỡng yêu cầu $\le 30$ giây của DoD.
-- **Kiểm thử & Hồi quy:**
-  - Tổng số test case tự động tăng lên **24 passed tests** (tăng thêm 9 test scenarios cho toàn bộ tính năng mới).
+- **Chuyển đổi thành công kiến trúc mô phỏng theo Change Request:**
+  - Triển khai mô hình nhiên liệu đèn lồng hoàn chỉnh: đèn sáng tự tiêu hao $1.0$/s, có thể được châm dầu, tắt đèn khi hết dầu, và nhớ trạng thái để thắp lại với chi phí giảm còn 5 đom đóm.
+  - Hành vi Bóng Mực hút dầu (`drain`) hoạt động mượt mà: nhận diện đèn yếu (`fuel < 30`) mất vùng an toàn, tiếp cận $\le 2$m và hút $5$ fuel/s, phát sự kiện `fuel_drain` mỗi 60 ticks.
+  - Luật thắng mới được kích hoạt chuẩn xác tại thời điểm bình minh: kiểm tra tỉ lệ đèn sáng $\ge 60\%$, phát sự kiện `game_over {"reason": "dawn_survived"}`.
+  - Sức chứa túi đom đóm mở rộng động theo số lần thắp đèn thành công ($10 + 2 \times successful\_lights$, trần 20).
+- **Tuân thủ quy trình SDLC khi có Breaking Changes:**
+  - Có tài liệu kiến trúc [ADR-001](file:///d:/VinAI/prj/Day12/K5-L3A-DAY12-NguyenHuyGiang-2A202603543-AI-SDLC-Dao-Den-Long/docs/adr/ADR-001-fuel-and-dawn-win.md) giải trình chi tiết lý do và giải pháp.
+  - Có file [CHANGELOG.md](file:///d:/VinAI/prj/Day12/K5-L3A-DAY12-NguyenHuyGiang-2A202603543-AI-SDLC-Dao-Den-Long/CHANGELOG.md) liệt kê rõ ràng các điểm phá vỡ tương thích.
+  - Không có bất kỳ test nào bị skip âm thầm. Test cũ `test_game_over_win` được cập nhật kèm ghi chú giải thích luật thắng mới.
+- **Kiểm thử tự động đạt 31/31 passed 100% trong ~1.9 giây.**
 
-### 2. Phân tích lỗi hồi quy & Bài học về SDLC
-- **Hiện tượng:** Khi nâng cấp lên Ticket-02, test cũ `test_pulse_stuns_and_pushes_shades` bị fail do mong đợi bóng mực bị đẩy lùi tức thời $\ge 5.0$m ngay trong tick đầu.
-- **Phân tích:** Ticket-02 quy định lực đẩy của Pulse được phân bổ đều trong $15$ ticks đầu ($4.0$m / 15 ticks) thay vì dịch chuyển tức thời. Đây là sự thay đổi cố ý về đặc tả gameplay.
-- **Giải pháp xử lý:** Tuân thủ quy định SDLC của khóa học: Không âm thầm bỏ test mà cập nhật lại test case kèm chú thích rõ ràng: kiểm tra bước 1 đã bắt đầu đẩy lùi ($pos > 2.0$) và sau 15 ticks đã đẩy lùi hoàn tất ($pos \ge 4.9$m). Điều này chứng minh quy trình kiểm thử hồi quy được kiểm soát chặt chẽ.
+### 2. Phân tích lỗi & Cách phát hiện
+- **Lỗi sai số dấu phẩy động (Floating point precision):** Khi trừ dầu mỗi tick ($1/60$), giá trị nhiên liệu bị dư lại $6.9 \times 10^{-18} > 0$ khiến đèn không chuyển sang tắt đúng lúc.
+  * **Giải pháp:** Sử dụng ngưỡng sai số epsilon $10^{-5}$ (`if L.fuel <= 1e-5:`) khi kiểm tra hết dầu, đảm bảo tính tất định và chuyển trạng thái dứt khoát.

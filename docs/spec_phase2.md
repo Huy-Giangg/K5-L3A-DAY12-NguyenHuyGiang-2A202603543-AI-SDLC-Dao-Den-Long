@@ -89,3 +89,4 @@ Tài liệu này xác định chi tiết tiêu chí nghiệm thu (Acceptance Cri
 - **AC 8.2 (Cường độ ánh sáng động):**
   - Cường độ ánh sáng môi trường tính theo công thức:
     $$I = 0.15 + 0.55 \times \left(\frac{\text{đèn sáng}}{\text{tổng đèn}}\right)$$
+

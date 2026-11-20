@@ -76,7 +76,9 @@ def run_headless(args_list: Optional[List[str]] = None) -> int:
                     sc = t["score"]
                     tuning.per_mote_score = sc.get("per_mote", tuning.per_mote_score)
                     tuning.per_lantern_score = sc.get("per_lantern", tuning.per_lantern_score)
+                    tuning.per_relight_score = sc.get("per_relight", tuning.per_relight_score)
                     tuning.per_stun_score = sc.get("per_stun", tuning.per_stun_score)
+                    tuning.per_stun_drain_score = sc.get("per_stun_drain", tuning.per_stun_drain_score)
                     tuning.per_second_left_score = sc.get("per_second_left", tuning.per_second_left_score)
                     tuning.per_flame_left_score = sc.get("per_flame_left", tuning.per_flame_left_score)
     except Exception:

@@ -203,6 +203,10 @@
                 <span>Độ nhạy chuột:</span>
                 <input type="range" id="sens-slider" min="1" max="10" value="5" onchange="updateSettings()">
             </div>
+            <div class="setting-row">
+                <span>Chế độ mù màu (Dễ phân biệt):</span>
+                <input type="checkbox" id="colorblind-check" onchange="toggleColorblindMode()" style="width: 20px; height: 20px; accent-color: #F2C14E;">
+            </div>
             <button class="btn-action" onclick="closeSettings()">Lưu & Đóng</button>
         </div>
     </div>
@@ -309,25 +313,25 @@
         const NIGHT_CONFIGS = {
             1: {
                 title: "Đêm 1 · Đảo Bến",
-                desc: "Đảo tròn bán kính 40m có 5 Đèn Lồng Lớn. Thu thập đom đóm thắp sáng trước khi bình minh ló dạng.",
-                dialogue: "\"Mây à, đêm nay sương đen nuốt chửng ánh sáng Đảo Bến. Hãy thắp lại 5 ngọn Đèn Lồng Lớn. Cẩn trọng với Bóng Mực trong sương!\"",
-                duration: 300,
+                desc: "Đảo tròn bán kính 40m có 5 Đèn Lồng Lớn. Giữ sáng ít nhất 3/5 đèn tới bình minh.",
+                dialogue: "\"Mây à, đèn đêm nay sẽ cạn dần dầu! Hãy gom đom đóm châm dầu và thắp sáng ít nhất 3/5 ngọn đèn tới bình minh. Cẩn trọng với Bóng Mực hút dầu!\"",
+                duration: 240,
                 lanternCount: 5,
                 lanternCost: 10
             },
             2: {
                 title: "Đêm 2 · Đảo Cau",
-                desc: "Hai hòn đảo nối bằng cầu tre lắt lẻo và bục nhảy trợ lực. 6 Đèn Lồng. Cẩn thận Gió Lạc cướp đom đóm!",
-                dialogue: "\"Đảo Cau có 2 bờ cách nhau bởi biển mây. Cầu tre rất hẹp không lan can, hãy tận dụng Bục Nhảy và Bùa Gió linh thiêng để di chuyển!\"",
-                duration: 330,
+                desc: "Hai hòn đảo nối cầu tre và bục nhảy. 6 Đèn Lồng. Giữ sáng ít nhất 4/6 đèn.",
+                dialogue: "\"Đảo Cau có 2 bờ cách nhau bởi biển mây. Hãy dùng Bục Nhảy và Bùa Gió linh thiêng để tuần tra và châm dầu cho ít nhất 4/6 ngọn đèn!\"",
+                duration: 270,
                 lanternCount: 6,
                 lanternCost: 10
             },
             3: {
                 title: "Đêm 3 · Đảo Chuông",
-                desc: "Đảo 3 tầng kỳ vĩ với 7 Đèn Lồng, dốc leo và tháp chuông. Gió bão giật từng cơn mỗi 30 giây!",
-                dialogue: "\"Đêm cuối cùng tại Đảo Chuông! Đảo có 3 tầng cao vút và gió lốc cuộn trào. Hãy thắp sáng tất cả 7 ngọn đèn để đón ánh Bình Minh rực rỡ!\"",
-                duration: 360,
+                desc: "Đảo 3 tầng kỳ vĩ với 7 Đèn Lồng. Gió bão giật mỗi 30s! Giữ sáng ít nhất 5/7 đèn.",
+                dialogue: "\"Đêm cuối cùng tại Đảo Chuông! Đảo có 3 tầng cao vút và gió lốc cuộn trào. Hãy bảo vệ ít nhất 5/7 ngọn đèn để đón ánh Bình Minh rực rỡ!\"",
+                duration: 300,
                 lanternCount: 7,
                 lanternCost: 10
             }
@@ -661,53 +665,93 @@
             updateHUD();
         }
 
-        function triggerInteract() {
-            if (isPaused || isNightOver || carried <= 0) return;
-            lanterns.forEach(L => {
-                if (!L.lit) {
-                    const dist = Math.hypot(playerGroup.position.x - L.x, playerGroup.position.z - L.z);
-                    if (dist <= 2.0) {
-                        const needed = 10 - L.deposited;
-                        const amt = Math.min(carried, needed);
-                        carried -= amt;
-                        L.deposited += amt;
-                        currentNightScore += amt * 10;
-                        playSfx('deposit');
-                        if (L.deposited >= 10) {
-                            L.lit = true;
-                            L.core.material.color.setHex(0xFFB347);
-                            L.light.intensity = 3.5;
-                            currentNightScore += 100;
-                            playSfx('lantern_lit');
-                            checkWin();
-                        }
-                        updateHUD();
-                    }
+        let colorblindMode = false;
+        function toggleColorblindMode() {
+            colorblindMode = document.getElementById('colorblind-check').checked;
+            shades.forEach(s => {
+                if (colorblindMode) {
+                    s.mesh.material.color.setHex(0x00B3FF);
+                } else {
+                    s.mesh.material.color.setHex(0x120A1A);
                 }
             });
         }
 
-        function checkWin() {
-            const litCount = lanterns.filter(l => l.lit).length;
-            ambientLight.intensity = 0.15 + 0.55 * (litCount / lanterns.length);
+        function triggerInteract() {
+            if (isPaused || isNightOver || carried <= 0) return;
+            // Find eligible lantern: unlit OR lit with fuel < 100
+            let targetL = null;
+            let minDist = 2.0;
+            lanterns.forEach(L => {
+                const dist = Math.hypot(playerGroup.position.x - L.x, playerGroup.position.z - L.z);
+                if (dist <= minDist) {
+                    if (!L.lit || (L.lit && L.fuel < 100)) {
+                        targetL = L;
+                        minDist = dist;
+                    }
+                }
+            });
 
-            if (lanterns.every(l => l.lit)) {
+            if (targetL) {
+                if (targetL.lit) {
+                    // Refuel
+                    const needed = Math.ceil((100 - targetL.fuel) / 10);
+                    const used = Math.min(carried, needed);
+                    if (used > 0) {
+                        carried -= used;
+                        targetL.fuel = Math.min(100, targetL.fuel + 10 * used);
+                        currentNightScore += used * 5;
+                        playSfx('deposit');
+                        updateHUD();
+                    }
+                } else {
+                    // Relight or New Light
+                    const cost = targetL.everLit ? 5 : 10;
+                    const needed = cost - targetL.deposited;
+                    const amt = Math.min(carried, needed);
+                    if (amt > 0) {
+                        carried -= amt;
+                        targetL.deposited += amt;
+                        currentNightScore += amt * 5;
+                        playSfx('deposit');
+                        if (targetL.deposited >= cost) {
+                            targetL.lit = true;
+                            targetL.fuel = 100;
+                            targetL.everLit = true;
+                            targetL.core.material.color.setHex(0xFFB347);
+                            targetL.light.intensity = 3.5;
+                            currentNightScore += targetL.everLit ? 40 : 100;
+                            playSfx('lantern_lit');
+                        }
+                        updateHUD();
+                    }
+                }
+            }
+        }
+
+        function checkDawnOutcome() {
+            const litCount = lanterns.filter(l => l.lit).length;
+            const needed = Math.ceil(0.6 * lanterns.length);
+
+            if (litCount >= needed) {
                 isNightOver = true;
-                const timeBonus = Math.floor(timeLeft) * 2;
+                const lanternsBonus = lanterns.filter(l => l.lit).reduce((sum, l) => sum + 50 + Math.floor(l.fuel), 0);
                 const flameBonus = flames * 50;
-                currentNightScore += timeBonus + flameBonus;
+                currentNightScore += lanternsBonus + flameBonus;
                 cumulativeScore += currentNightScore;
 
                 if (currentNight < 3) {
-                    document.getElementById('result-title').innerText = "VƯỢT QUA ĐÊM " + currentNight + "!";
-                    document.getElementById('result-desc').innerText = `Bạn đã thắp sáng toàn bộ ngọn đèn! Điểm Đêm này: ${currentNightScore}. Tổng điểm tích lũy: ${cumulativeScore}`;
+                    document.getElementById('result-title').innerText = "VƯỢT QUA ĐÊM " + currentNight + " (BÌNH MINH)!";
+                    document.getElementById('result-desc').innerText = `Tuyệt vời! Bạn giữ sáng ${litCount}/${lanterns.length} ngọn đèn đến bình minh! Điểm Đêm này: ${currentNightScore}. Tổng điểm: ${cumulativeScore}`;
                     document.getElementById('btn-next-night').style.display = "inline-block";
                 } else {
                     document.getElementById('result-title').innerText = "BÌNH MINH ĐÃ TỚI! CHIẾN THẮNG TRỌN VẸN!";
-                    document.getElementById('result-desc').innerText = `Chúc mừng Mây! Toàn bộ 3 Đêm trên quần đảo đã bừng sáng. Tổng điểm chung cuộc: ${cumulativeScore}!`;
+                    document.getElementById('result-desc').innerText = `Chúc mừng Mây! Bạn đã giữ trọn vẹn ánh sáng qua cả 3 Đêm. Tổng điểm chung cuộc: ${cumulativeScore}!`;
                     document.getElementById('btn-next-night').style.display = "none";
                 }
                 document.getElementById('modal-result').style.display = "flex";
+            } else {
+                triggerGameOver('dawn');
             }
         }
 
@@ -715,7 +759,7 @@
             isNightOver = true;
             playSfx('hit');
             document.getElementById('result-title').innerText = "BẠN ĐÃ THUA";
-            document.getElementById('result-desc').innerText = reason === 'dawn' ? "Trời đã sáng trước khi kịp thắp hết đèn!" : "Bạn đã cạn kiệt Ngọn Lửa sinh lực!";
+            document.getElementById('result-desc').innerText = reason === 'dawn' ? "Trời đã sáng nhưng số đèn sáng không đạt yêu cầu 60%!" : "Bạn đã cạn kiệt Ngọn Lửa sinh lực!";
             document.getElementById('btn-next-night').style.display = "none";
             document.getElementById('modal-result').style.display = "flex";
         }
@@ -820,7 +864,30 @@
             if (isPlaying && !isPaused && !isNightOver) {
                 // Timers
                 timeLeft = Math.max(0, timeLeft - dt);
-                if (timeLeft <= 0) triggerGameOver('dawn');
+                if (timeLeft <= 0) {
+                    checkDawnOutcome();
+                }
+
+                // Lanterns fuel decay (1.0 unit/s)
+                lanterns.forEach(L => {
+                    if (L.lit) {
+                        L.fuel = Math.max(0, L.fuel - dt);
+                        if (L.fuel <= 0) {
+                            L.lit = false;
+                            L.fuel = 0;
+                            L.deposited = 0;
+                            L.core.material.color.setHex(0x5B5F6E);
+                            L.light.intensity = 0;
+                        } else if (L.fuel < 30) {
+                            // Blink warning 1Hz
+                            const blink = Math.sin(now * 0.006) > 0;
+                            L.light.intensity = blink ? 3.0 : 0.8;
+                        } else {
+                            L.light.intensity = 3.5;
+                        }
+                    }
+                });
+
                 if (dashCd > 0) dashCd = Math.max(0, dashCd - dt);
                 if (pulseCd > 0) pulseCd = Math.max(0, pulseCd - dt);
                 if (charmTimer > 0) charmTimer = Math.max(0, charmTimer - dt);

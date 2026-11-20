@@ -112,18 +112,26 @@ def test_safe_zone_repels_shades():
     assert dist_to_lantern > 5.0 # Repelled outside safe radius
 
 def test_game_over_win():
+    # Ticket-03 [BREAKING CHANGE]: "Không còn thắng sớm. Thắp đủ đèn không kết thúc Đêm."
+    # Win condition only triggers at dawn (time_left_s <= 0) if lit lanterns >= 60%.
     engine = SimulationEngine()
     engine.player.pos = [0.0, 0.0, 0.0]
     engine.lanterns = [
-        LanternState(id=f"L{i}", pos=[0.0, 0.0, float(i*5)], lit=True, deposited=5)
+        LanternState(id=f"L{i}", pos=[0.0, 0.0, float(i*5)], lit=True, deposited=5, fuel=100.0)
         for i in range(1, 6)
     ]
     engine.random_motes = False
     engine.random_shades = False
 
+    # Mid-game: having all lanterns lit does NOT end game prematurely
+    engine.step()
+    assert engine.state == "playing"
+
+    # Fast forward to dawn (time_left_s = 0):
+    engine.time_left_s = 0.0
     engine.step()
     assert engine.state == "won"
-    assert any(e["name"] == "game_over" and e["data"]["result"] == "won" and e["data"]["reason"] == "all_lit" for e in engine.events_this_tick)
+    assert any(e["name"] == "game_over" and e["data"]["reason"] == "dawn_survived" for e in engine.events_this_tick)
 
 def test_game_over_lost_no_flames():
     engine = SimulationEngine()

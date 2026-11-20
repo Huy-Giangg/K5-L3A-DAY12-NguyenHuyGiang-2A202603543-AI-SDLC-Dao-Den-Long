@@ -20,7 +20,7 @@ class SimulationEngine:
         self.prev_state_before_pause = "playing"
         self.score = 0
 
-        # Duration based on night
+        # Duration based on night (Ticket-03: 240 / 270 / 300)
         if self.night == 1:
             self.total_duration_s = float(self.tuning.night1_duration_s)
         elif self.night == 2:
@@ -84,7 +84,6 @@ class SimulationEngine:
                 LanternState(id="L4", pos=[-14.7, 0.0, -20.2]),
                 LanternState(id="L5", pos=[-23.8, 0.0, 7.7])
             ]
-            # Mote spawn points: 8 points R=12 (every 45 deg) + 16 points R=33 (every 22.5 deg)
             for i in range(8):
                 deg = i * 45.0
                 rad = math.radians(deg)
@@ -94,20 +93,17 @@ class SimulationEngine:
                 rad = math.radians(deg)
                 self.mote_spawn_points.append([round(33.0 * math.cos(rad), 3), 0.0, round(33.0 * math.sin(rad), 3)])
 
-            # Initial 20 motes placed on first 20 points
             for i in range(min(20, len(self.mote_spawn_points))):
                 pt = self.mote_spawn_points[i]
                 self.motes.append(MoteState(id=f"M{i+1}", pos=[pt[0], pt[1], pt[2]], kind="random"))
             self.next_mote_id_idx = len(self.motes) + 1
 
-            # Shade spawn points: 12 points R=37 (15, 45, ...)
             for i in range(12):
                 deg = 15.0 + i * 30.0
                 rad = math.radians(deg)
                 self.shade_spawn_points.append([round(37.0 * math.cos(rad), 3), 0.0, round(37.0 * math.sin(rad), 3)])
 
         elif self.night == 2:
-            # 6 Lanterns: (0,0,20), (17,0,-10), (-17,0,-10), (70,0,20), (87,0,-10), (53,0,-10)
             self.lanterns = [
                 LanternState(id="L1", pos=[0.0, 0.0, 20.0]),
                 LanternState(id="L2", pos=[17.0, 0.0, -10.0]),
@@ -116,7 +112,6 @@ class SimulationEngine:
                 LanternState(id="L5", pos=[87.0, 0.0, -10.0]),
                 LanternState(id="L6", pos=[53.0, 0.0, -10.0])
             ]
-            # Jump pads: at (20,0,18) targeting B(70,0,0) and (50,0,-18) targeting A(0,0,0)
             dir_a_to_b = [70.0 - 20.0, 0.0, 0.0 - 18.0]
             mag_ab = math.hypot(dir_a_to_b[0], dir_a_to_b[2])
             dir_b_to_a = [0.0 - 50.0, 0.0, 0.0 - (-18.0)]
@@ -129,10 +124,8 @@ class SimulationEngine:
                         target_dir=[dir_b_to_a[0]/mag_ba, 0.0, dir_b_to_a[2]/mag_ba])
             ]
 
-            # Charm C1 at (35,0,0)
             self.charms = [CharmState(id="C1", pos=[35.0, 0.0, 0.0])]
 
-            # Mote spawn points: Island A and Island B
             for center_x in [0.0, 70.0]:
                 for deg in [0.0, 90.0, 180.0, 270.0]:
                     rad = math.radians(deg)
@@ -142,13 +135,11 @@ class SimulationEngine:
                     rad = math.radians(deg)
                     self.mote_spawn_points.append([round(center_x + 22.0 * math.cos(rad), 3), 0.0, round(22.0 * math.sin(rad), 3)])
 
-            # Initial 20 motes
             for i in range(min(20, len(self.mote_spawn_points))):
                 pt = self.mote_spawn_points[i]
                 self.motes.append(MoteState(id=f"M{i+1}", pos=[pt[0], pt[1], pt[2]], kind="random"))
             self.next_mote_id_idx = len(self.motes) + 1
 
-            # Shade spawn points: 8 points R=26 per island
             for center_x in [0.0, 70.0]:
                 for i in range(8):
                     deg = 22.5 + i * 45.0
@@ -156,7 +147,6 @@ class SimulationEngine:
                     self.shade_spawn_points.append([round(center_x + 26.0 * math.cos(rad), 3), 0.0, round(26.0 * math.sin(rad), 3)])
 
         elif self.night == 3:
-            # 7 Lanterns
             self.lanterns = [
                 LanternState(id="L1", pos=[0.0, 6.0, 6.0]),
                 LanternState(id="L2", pos=[18.0, 3.0, 10.0]),
@@ -166,16 +156,13 @@ class SimulationEngine:
                 LanternState(id="L6", pos=[20.0, 0.0, -35.0]),
                 LanternState(id="L7", pos=[-20.0, 0.0, -35.0])
             ]
-            # Jump pad at (0,3,13) targeting -Z onto tier 2 (Y=6)
             self.jump_pads = [
                 JumpPad(pos=[0.0, 3.0, 13.0], launch_vy=12.0, launch_hspeed=8.0, target_dir=[0.0, 0.0, -1.0])
             ]
-            # Charms C1 at (30,0,25) and C2 at (-30,0,25)
             self.charms = [
                 CharmState(id="C1", pos=[30.0, 0.0, 25.0]),
                 CharmState(id="C2", pos=[-30.0, 0.0, 25.0])
             ]
-            # Mote spawn points (30): Tier 0 (18 pts R=34), Tier 1 (8 pts R=18), Tier 2 (4 pts R=5)
             for i in range(18):
                 deg = i * 20.0
                 rad = math.radians(deg)
@@ -187,20 +174,17 @@ class SimulationEngine:
                 rad = math.radians(deg)
                 self.mote_spawn_points.append([round(5.0 * math.cos(rad), 3), 6.0, round(5.0 * math.sin(rad), 3)])
 
-            # Initial 20 motes
             for i in range(min(20, len(self.mote_spawn_points))):
                 pt = self.mote_spawn_points[i]
                 self.motes.append(MoteState(id=f"M{i+1}", pos=[pt[0], pt[1], pt[2]], kind="random"))
             self.next_mote_id_idx = len(self.motes) + 1
 
-            # Shade spawn points: 16 points R=43 (every 22.5 deg)
             for i in range(16):
                 deg = i * 22.5
                 rad = math.radians(deg)
                 self.shade_spawn_points.append([round(43.0 * math.cos(rad), 3), 0.0, round(43.0 * math.sin(rad), 3)])
 
     def _get_floor_height(self, x: float, z: float) -> Optional[float]:
-        # Returns floor Y, or None if in void (falling)
         if self.night == 1:
             r = math.hypot(x, z)
             if r <= 40.0:
@@ -213,31 +197,23 @@ class SimulationEngine:
             r_b = math.hypot(x - 70.0, z - 0.0)
             if r_b <= 28.0:
                 return 0.0
-            # Bamboo bridge: x in [26, 44], z in [-2, 2]
             if 26.0 <= x <= 44.0 and -2.0 <= z <= 2.0:
                 return 0.0
             return None
         elif self.night == 3:
             r = math.hypot(x, z)
-            # Tier 2: disc R <= 8 at Y=6
             if r <= 8.0:
-                # Bell tower cylinder at center R <= 2: barrier
                 return 6.0
-            # Tier 1: ring 12 <= R <= 24 at z > 0, Y=3
             if 12.0 <= r <= 24.0 and z > 0.0:
                 return 3.0
-            # Check 2 ramps: wide 3m along radial lines at 30 deg and 150 deg, R in [24, 30]
-            # Ramp height transitions from Y=0 at R=30 to Y=3 at R=24
             if 24.0 <= r <= 30.0:
                 ang_deg = math.degrees(math.atan2(z, x))
                 for ramp_ang in [30.0, 150.0]:
                     diff = abs((ang_deg - ramp_ang + 180.0) % 360.0 - 180.0)
                     dist_to_centerline = r * math.sin(math.radians(diff))
                     if abs(dist_to_centerline) <= 1.5:
-                        # On ramp
-                        t = (30.0 - r) / (30.0 - 24.0) # 0 at R=30, 1 at R=24
+                        t = (30.0 - r) / (30.0 - 24.0)
                         return 0.0 + t * 3.0
-            # Tier 0: full island R <= 45 at Y=0
             if r <= 45.0:
                 return 0.0
             return None
@@ -261,6 +237,8 @@ class SimulationEngine:
                 self.player.pulse_cd_ticks = int(p_data["pulse_cd_ticks"])
             if "charm_ticks" in p_data:
                 self.player.charm_ticks_left = int(p_data["charm_ticks"])
+            if "successful_lights" in p_data:
+                self.player.successful_lights = int(p_data["successful_lights"])
 
         if "random_motes" in scenario:
             self.random_motes = bool(scenario["random_motes"])
@@ -278,20 +256,37 @@ class SimulationEngine:
             for l_in in scenario["lanterns"]:
                 lid = l_in.get("id")
                 target = next((l for l in self.lanterns if l.id == lid), None)
-                if target:
-                    if "pos" in l_in:
-                        target.pos = [float(v) for v in l_in["pos"]]
-                    if "deposited" in l_in:
-                        target.deposited = int(l_in["deposited"])
-                    if "lit" in l_in:
-                        target.lit = bool(l_in["lit"])
-                else:
-                    self.lanterns.append(LanternState(
+                if not target:
+                    target = LanternState(
                         id=lid,
-                        pos=[float(v) for v in l_in.get("pos", [0.0, 0.0, 0.0])],
-                        deposited=int(l_in.get("deposited", 0)),
-                        lit=bool(l_in.get("lit", False))
-                    ))
+                        pos=[float(v) for v in l_in.get("pos", [0.0, 0.0, 0.0])]
+                    )
+                    self.lanterns.append(target)
+
+                if "pos" in l_in:
+                    target.pos = [float(v) for v in l_in["pos"]]
+                if "deposited" in l_in:
+                    target.deposited = int(l_in["deposited"])
+                if "ever_lit" in l_in:
+                    target.ever_lit = bool(l_in["ever_lit"])
+
+                # Lit & fuel logic according to contract v1.2:
+                # "Đèn đặt lit: true mà không có fuel thì mặc định fuel: 100"
+                if "lit" in l_in:
+                    target.lit = bool(l_in["lit"])
+                    if target.lit:
+                        target.ever_lit = True
+                        if "fuel" in l_in:
+                            target.fuel = float(l_in["fuel"])
+                        else:
+                            target.fuel = 100.0
+                    else:
+                        target.fuel = float(l_in.get("fuel", 0.0))
+                elif "fuel" in l_in:
+                    target.fuel = float(l_in["fuel"])
+                    target.lit = target.fuel > 0.0
+                    if target.lit:
+                        target.ever_lit = True
 
         if "motes" in scenario:
             self.motes = []
@@ -314,7 +309,8 @@ class SimulationEngine:
                 pos = [float(v) for v in s_in.get("pos", [10.0, 0.0, 0.0])]
                 state = s_in.get("state", "chase")
                 ticks_left = int(s_in.get("state_ticks_left", 0))
-                self.shades.append(ShadeState(id=sid, pos=pos, state=state, state_ticks_left=ticks_left))
+                target_l_id = s_in.get("target_lantern_id", None)
+                self.shades.append(ShadeState(id=sid, pos=pos, state=state, state_ticks_left=ticks_left, target_lantern_id=target_l_id))
             self.next_shade_id_idx = len(scenario["shades"]) + 1
 
         if "drifters" in scenario:
@@ -377,10 +373,9 @@ class SimulationEngine:
                 self.state = "paused"
                 self.events_this_tick.append({"type": "event", "tick": next_tick, "name": "paused", "data": {}})
                 self.tick = next_tick
-                return # Dừng bước tại đây khi vừa tạm dừng
+                return
 
         if self.state == "paused":
-            # Khi đang tạm dừng: tick tăng nhưng sim_tick, thời gian, hồi chiêu, spawn, TTL đều đứng yên
             self.tick = next_tick
             return
 
@@ -389,8 +384,7 @@ class SimulationEngine:
             return
 
         # -------------------------------------------------------------
-        # STEP 2: Giảm các bộ đếm
-        # thời gian, hồi chiêu, bất tử, choáng, bùa, TTL đom đóm rơi, hồi bùa
+        # STEP 2: Giảm các bộ đếm & Trừ dầu đèn (hao + bị hút)
         # -------------------------------------------------------------
         self.time_left_s = max(0.0, self.time_left_s - self.dt)
 
@@ -407,14 +401,12 @@ class SimulationEngine:
         if self.player.charm_ticks_left > 0:
             self.player.charm_ticks_left -= 1
 
-        # Charm respawn timers
         for charm in self.charms:
             if not charm.available and charm.respawn_ticks > 0:
                 charm.respawn_ticks -= 1
                 if charm.respawn_ticks <= 0:
                     charm.available = True
 
-        # Mote TTL
         for mote in self.motes:
             if mote.active:
                 mote.age_ticks += 1
@@ -423,10 +415,52 @@ class SimulationEngine:
                     if mote.ttl_ticks <= 0:
                         mote.active = False
 
-        # Recently lit lanterns protection timer (30 ticks)
         for L in self.lanterns:
             if L.recently_lit_ticks > 0:
                 L.recently_lit_ticks -= 1
+
+        # Fuel decay and drain for lit lanterns
+        # Ticket-03: Hao hụt tự nhiên 1.0/s (1/60 mỗi tick)
+        for L in self.lanterns:
+            if L.lit:
+                decay = 1.0 / 60.0
+                # Check shades draining this lantern
+                draining_shades = [s for s in self.shades if s.state == "drain" and s.target_lantern_id == L.id]
+                drain_rate = len(draining_shades) * (5.0 / 60.0)
+                L.fuel -= (decay + drain_rate)
+
+                # Process fuel_drain events (every 60 ticks when draining)
+                for s in draining_shades:
+                    s.drain_ticks += 1
+                    if s.drain_ticks % 60 == 0:
+                        self.events_this_tick.append({
+                            "type": "event",
+                            "tick": next_tick,
+                            "name": "fuel_drain",
+                            "data": {
+                                "lantern_id": L.id,
+                                "shade_id": s.id,
+                                "fuel": round(max(0.0, L.fuel), 1)
+                            }
+                        })
+
+                # Check if lantern runs out of fuel
+                if L.fuel <= 1e-5:
+                    L.lit = False
+                    L.fuel = 0.0
+                    L.deposited = 0
+                    L.ever_lit = True
+                    self.events_this_tick.append({
+                        "type": "event",
+                        "tick": next_tick,
+                        "name": "lantern_out",
+                        "data": {"lantern_id": L.id}
+                    })
+                    # Revert draining shades on this lantern to wander
+                    for s in draining_shades:
+                        s.state = "wander"
+                        s.target_lantern_id = None
+                        s.drain_ticks = 0
 
         # -------------------------------------------------------------
         # STEP 3: Di chuyển Mây (nhảy, lướt, bục nhảy, gió) rồi kiểm tra rơi khỏi đảo
@@ -441,11 +475,9 @@ class SimulationEngine:
         self.prev_interact = self.current_interact
         self.prev_pulse = self.current_pulse
 
-        # Fall recovery handling
         if self.player.fall_wait_ticks > 0:
             self.player.fall_wait_ticks -= 1
             if self.player.fall_wait_ticks <= 0:
-                # Respawn at (0,0,0)
                 self.player.pos = [0.0, 0.0, 0.0]
                 self.player.vel = [0.0, 0.0, 0.0]
                 self.player.grounded = True
@@ -453,17 +485,14 @@ class SimulationEngine:
                 self.player.invuln = True
                 self.player.jumppad_flight = False
         else:
-            # Action: Jump (chỉ nhảy khi chạm đất)
             if jump_triggered and self.player.grounded:
                 self.player.vel[1] = 7.0
                 self.player.grounded = False
 
-            # Action: Dash
             has_charm = (self.player.charm_ticks_left > 0)
             if dash_triggered and (has_charm or self.player.dash_cd_ticks <= 0) and self.player.dash_ticks_left <= 0:
-                self.player.dash_ticks_left = 12 # 0.2s = 12 ticks
-                self.player.dash_cd_ticks = 90 # 1.5s = 90 ticks
-                # Direction of dash: moving direction if moving, else facing direction
+                self.player.dash_ticks_left = 12
+                self.player.dash_cd_ticks = 90
                 mag_m = math.hypot(self.current_move[0], self.current_move[1])
                 if mag_m > 0.01:
                     theta = math.radians(self.current_cam_yaw_deg)
@@ -476,13 +505,12 @@ class SimulationEngine:
                     self.player.dash_dir = [self.player.facing_dir[0], 0.0, self.player.facing_dir[2]]
                 self.events_this_tick.append({"type": "event", "tick": next_tick, "name": "dash", "data": {}})
 
-            # Process Wind in Night 3
             if self.wind_enabled:
                 self.wind.cycle_ticks += 1
-                if self.wind.cycle_ticks >= 1800: # 30s
+                if self.wind.cycle_ticks >= 1800:
                     self.wind.cycle_ticks = 0
                     self.wind.active = True
-                    self.wind.duration_ticks = 300 # 5s
+                    self.wind.duration_ticks = 300
                     self.wind.dir_deg = self.rng.uniform(0.0, 360.0)
                     rad_w = math.radians(self.wind.dir_deg)
                     self.wind.wind_vector = [2.0 * math.cos(rad_w), 0.0, 2.0 * math.sin(rad_w)]
@@ -493,9 +521,7 @@ class SimulationEngine:
                         self.wind.active = False
                         self.wind.wind_vector = [0.0, 0.0, 0.0]
 
-            # Player displacement
             if self.player.dash_ticks_left > 0:
-                # Dashing: 14 m/s in dash_dir, maintain height on air
                 self.player.pos[0] += self.player.dash_dir[0] * self.tuning.dash_speed * self.dt
                 self.player.pos[2] += self.player.dash_dir[2] * self.tuning.dash_speed * self.dt
                 self.player.vel[0] = self.player.dash_dir[0] * self.tuning.dash_speed
@@ -503,13 +529,11 @@ class SimulationEngine:
                 self.player.vel[1] = 0.0
                 self.player.dash_ticks_left -= 1
             elif self.player.jumppad_flight:
-                # Jumppad trajectory: maintain horizontal velocity, gravity -20
                 self.player.vel[1] += -20.0 * self.dt
                 self.player.pos[0] += self.player.vel[0] * self.dt
                 self.player.pos[1] += self.player.vel[1] * self.dt
                 self.player.pos[2] += self.player.vel[2] * self.dt
             else:
-                # Normal running
                 run_speed = 7.2 if has_charm else self.tuning.player_speed
                 theta = math.radians(self.current_cam_yaw_deg)
                 x_in, z_in = self.current_move[0], self.current_move[1]
@@ -525,7 +549,6 @@ class SimulationEngine:
                 self.player.vel[0] = x_prime * run_speed
                 self.player.vel[2] = z_prime * run_speed
 
-                # Add wind
                 if self.wind.active:
                     self.player.vel[0] += self.wind.wind_vector[0]
                     self.player.vel[2] += self.wind.wind_vector[2]
@@ -533,12 +556,10 @@ class SimulationEngine:
                 self.player.pos[0] += self.player.vel[0] * self.dt
                 self.player.pos[2] += self.player.vel[2] * self.dt
 
-                # Gravity
                 if not self.player.grounded:
                     self.player.vel[1] += -20.0 * self.dt
                     self.player.pos[1] += self.player.vel[1] * self.dt
 
-            # Floor and Terrain collision
             floor_y = self._get_floor_height(self.player.pos[0], self.player.pos[2])
             if floor_y is not None:
                 if self.player.pos[1] <= floor_y:
@@ -547,16 +568,13 @@ class SimulationEngine:
                     self.player.grounded = True
                     self.player.jumppad_flight = False
                 elif self.player.dash_ticks_left <= 0 and not self.player.jumppad_flight:
-                    # In air above floor
                     self.player.grounded = False
             else:
-                # Over void: falling
                 self.player.grounded = False
                 if not self.player.jumppad_flight and self.player.dash_ticks_left <= 0:
                     self.player.vel[1] += -20.0 * self.dt
                     self.player.pos[1] += self.player.vel[1] * self.dt
 
-            # Check Jump Pad trigger (chỉ khi chân chạm bục XZ <= 1.0m)
             if self.player.grounded or abs(self.player.pos[1] - (floor_y or 0.0)) <= 0.5:
                 for pad in self.jump_pads:
                     d_pad = self._horizontal_distance(self.player.pos, pad.pos)
@@ -569,7 +587,6 @@ class SimulationEngine:
                             self.player.vel[2] = pad.target_dir[2] * pad.launch_hspeed
                         break
 
-            # Fall check: Y < -10
             if self.player.pos[1] < -10.0:
                 self.player.flames -= 1
                 lost = self.player.carried
@@ -602,15 +619,15 @@ class SimulationEngine:
         # STEP 4: Nhặt đom đóm và bùa
         # -------------------------------------------------------------
         if self.player.fall_wait_ticks <= 0:
-            # Pick motes
             for mote in self.motes:
                 if mote.active:
                     d_xz = self._horizontal_distance(self.player.pos, mote.pos)
                     d_y = abs(self.player.pos[1] - mote.pos[1])
                     if d_xz <= self.tuning.pickup_radius and d_y <= 1.5:
                         if mote.kind == "dropped" and mote.age_ticks < 1:
-                            continue # Nhặt lại được từ tick sau
-                        if self.player.carried < self.tuning.carry_capacity:
+                            continue
+                        eff_cap = self.player.capacity if self.tuning.carry_capacity == 10 else self.tuning.carry_capacity
+                        if self.player.carried < eff_cap:
                             mote.active = False
                             self.player.carried += 1
                             self.events_this_tick.append({
@@ -620,7 +637,6 @@ class SimulationEngine:
                                 "data": {"carried": self.player.carried}
                             })
 
-            # Pick charms
             for charm in self.charms:
                 if charm.available:
                     d_xz = self._horizontal_distance(self.player.pos, charm.pos)
@@ -640,57 +656,106 @@ class SimulationEngine:
                         })
 
         # -------------------------------------------------------------
-        # STEP 5: Tương tác với đèn
+        # STEP 5: Tương tác với đèn (Châm dầu hoặc thắp mới/thắp lại)
         # -------------------------------------------------------------
         if interact_triggered and self.player.carried > 0 and self.player.fall_wait_ticks <= 0:
-            unlit_in_range = []
+            # Ticket-03: Chỉ xét đèn nhận được (chưa sáng, hoặc sáng nhưng chưa đầy dầu fuel < 100)
+            eligible_lanterns = []
             for L in self.lanterns:
-                if not L.lit:
+                if (not L.lit) or (L.lit and L.fuel < 100.0):
                     d = self._horizontal_distance(self.player.pos, L.pos)
                     if d <= self.tuning.interact_radius:
-                        unlit_in_range.append((d, L.id, L))
-            if unlit_in_range:
-                unlit_in_range.sort(key=lambda item: (item[0], item[1]))
-                target_l = unlit_in_range[0][2]
-                needed = self.tuning.lantern_cost - target_l.deposited
-                deposit_amt = min(self.player.carried, needed)
-                if deposit_amt > 0:
-                    self.player.carried -= deposit_amt
-                    target_l.deposited += deposit_amt
-                    self.score += deposit_amt * self.tuning.per_mote_score
-                    self.events_this_tick.append({
-                        "type": "event",
-                        "tick": next_tick,
-                        "name": "deposit",
-                        "data": {
-                            "lantern_id": target_l.id,
-                            "amount": deposit_amt,
-                            "deposited": target_l.deposited
-                        }
-                    })
-                    if target_l.deposited >= self.tuning.lantern_cost:
-                        target_l.lit = True
-                        target_l.recently_lit_ticks = 30
-                        self.score += self.tuning.per_lantern_score
+                        eligible_lanterns.append((d, L.id, L))
+
+            if eligible_lanterns:
+                eligible_lanterns.sort(key=lambda item: (item[0], item[1]))
+                target_l = eligible_lanterns[0][2]
+
+                if target_l.lit:
+                    # Châm dầu
+                    used = min(self.player.carried, math.ceil((100.0 - target_l.fuel) / 10.0))
+                    if used > 0:
+                        self.player.carried -= used
+                        old_fuel = target_l.fuel
+                        target_l.fuel = min(100.0, target_l.fuel + 10.0 * used)
+                        self.score += self.tuning.per_mote_score * used # +5 mỗi đom đóm
                         self.events_this_tick.append({
                             "type": "event",
                             "tick": next_tick,
-                            "name": "lantern_lit",
-                            "data": {"lantern_id": target_l.id}
+                            "name": "refuel",
+                            "data": {
+                                "lantern_id": target_l.id,
+                                "amount": used,
+                                "fuel": round(target_l.fuel, 1)
+                            }
                         })
+                        # Nếu fuel được châm lên >= 30: đẩy bóng mực trong 6m và đuổi bóng drain
+                        if old_fuel < self.tuning.low_fuel_threshold and target_l.fuel >= self.tuning.low_fuel_threshold:
+                            for s in self.shades:
+                                if s.state == "drain" and s.target_lantern_id == target_l.id:
+                                    s.state = "wander"
+                                    s.target_lantern_id = None
+                                    s.drain_ticks = 0
+                                d_s = self._horizontal_distance(s.pos, target_l.pos)
+                                if d_s < self.tuning.safe_radius:
+                                    dx = (s.pos[0] - target_l.pos[0]) / (d_s or 1.0)
+                                    dz = (s.pos[2] - target_l.pos[2]) / (d_s or 1.0)
+                                    s.pos[0] = target_l.pos[0] + dx * (self.tuning.safe_radius + 0.1)
+                                    s.pos[2] = target_l.pos[2] + dz * (self.tuning.safe_radius + 0.1)
+                else:
+                    # Thắp mới hoặc Thắp lại
+                    cost = self.tuning.relight_cost if target_l.ever_lit else self.tuning.lantern_cost
+                    needed = cost - target_l.deposited
+                    amt = min(self.player.carried, needed)
+                    if amt > 0:
+                        self.player.carried -= amt
+                        target_l.deposited += amt
+                        self.score += self.tuning.per_mote_score * amt
+                        self.events_this_tick.append({
+                            "type": "event",
+                            "tick": next_tick,
+                            "name": "deposit",
+                            "data": {
+                                "lantern_id": target_l.id,
+                                "amount": amt,
+                                "deposited": target_l.deposited
+                            }
+                        })
+                        if target_l.deposited >= cost:
+                            is_relight = target_l.ever_lit
+                            target_l.lit = True
+                            target_l.fuel = 100.0
+                            target_l.ever_lit = True
+                            target_l.recently_lit_ticks = 30
+                            self.player.successful_lights += 1
+
+                            if is_relight:
+                                target_l.relit_count += 1
+                                self.score += self.tuning.per_relight_score # +40
+                            else:
+                                self.score += self.tuning.per_lantern_score # +100
+
+                            self.events_this_tick.append({
+                                "type": "event",
+                                "tick": next_tick,
+                                "name": "lantern_lit",
+                                "data": {
+                                    "lantern_id": target_l.id,
+                                    "relight": is_relight
+                                }
+                            })
 
         # -------------------------------------------------------------
         # STEP 6: Cập nhật vùng an toàn
+        # Ticket-03: Đèn có fuel < 30 mất vùng an toàn. Đúng 30 vẫn còn
         # -------------------------------------------------------------
-        # Lit lanterns push or block shades in 6m radius
         for shade in self.shades:
-            if shade.state == "spawning":
+            if shade.state in ["spawning", "drain"]:
                 continue
             for L in self.lanterns:
-                if L.lit:
+                if L.lit and L.fuel >= self.tuning.low_fuel_threshold:
                     d_l = self._horizontal_distance(shade.pos, L.pos)
                     if d_l < self.tuning.safe_radius:
-                        # Push outside to edge 6m + epsilon
                         if d_l > 0.001:
                             dx = (shade.pos[0] - L.pos[0]) / d_l
                             dz = (shade.pos[2] - L.pos[2]) / d_l
@@ -704,25 +769,33 @@ class SimulationEngine:
         # -------------------------------------------------------------
         if pulse_triggered and self.player.carried >= self.tuning.pulse_cost and self.player.pulse_cd_ticks <= 0 and self.player.fall_wait_ticks <= 0:
             self.player.carried -= self.tuning.pulse_cost
-            self.player.pulse_cd_ticks = int(self.tuning.pulse_cooldown_s * 60) # 180 ticks
+            self.player.pulse_cd_ticks = int(self.tuning.pulse_cooldown_s * 60)
             pulse_center = [self.player.pos[0], self.player.pos[1] + 0.8, self.player.pos[2]]
 
             stunned_ids = []
             for shade in self.shades:
                 d3 = self._dist_3d(pulse_center, shade.pos)
                 if d3 <= self.tuning.pulse_radius:
+                    was_draining = (shade.state == "drain")
                     shade.state = "stunned"
-                    shade.state_ticks_left = 120 # 2.0s
+                    shade.state_ticks_left = 120
                     shade.push_ticks_left = 15
+                    shade.target_lantern_id = None
+                    shade.drain_ticks = 0
+
                     dh = self._horizontal_distance(self.player.pos, shade.pos)
                     if dh > 0.001:
                         shade.push_dir = [(shade.pos[0] - self.player.pos[0]) / dh, (shade.pos[2] - self.player.pos[2]) / dh]
                     else:
                         shade.push_dir = [1.0, 0.0]
                     stunned_ids.append(shade.id)
-                    self.score += self.tuning.per_stun_score
 
-            # Check drifters affected by pulse
+                    # Score for stun: +15 if was draining, else +5
+                    if was_draining:
+                        self.score += self.tuning.per_stun_drain_score
+                    else:
+                        self.score += self.tuning.per_stun_score
+
             for drifter in self.drifters:
                 if drifter.state in ["chase", "flee"]:
                     d3 = self._dist_3d(pulse_center, drifter.pos)
@@ -736,7 +809,6 @@ class SimulationEngine:
                             else:
                                 drifter.flee_dir = [1.0, 0.0, 0.0]
                         elif drifter.state == "flee" and drifter.stolen > 0:
-                            # Drop stolen motes on spot
                             amt = drifter.stolen
                             drifter.stolen = 0
                             for _ in range(amt):
@@ -788,6 +860,25 @@ class SimulationEngine:
                 shade.state_ticks_left -= 1
                 if shade.state_ticks_left <= 0:
                     shade.state = "wander"
+            elif shade.state == "drain":
+                # Check transitions from drain:
+                # 1. sang chase nếu Mây vào trong 6m
+                # 2. sang wander nếu đèn tắt hoặc fuel >= 30 hoặc cách đèn > 2m
+                d_player = self._horizontal_distance(shade.pos, self.player.pos)
+                if d_player <= 6.0:
+                    shade.state = "chase"
+                    shade.target_lantern_id = None
+                    shade.drain_ticks = 0
+                else:
+                    target_l = next((L for L in self.lanterns if L.id == shade.target_lantern_id), None)
+                    if not target_l or not target_l.lit or target_l.fuel >= self.tuning.low_fuel_threshold:
+                        shade.state = "wander"
+                        shade.target_lantern_id = None
+                        shade.drain_ticks = 0
+                    elif self._horizontal_distance(shade.pos, target_l.pos) > 2.0:
+                        shade.state = "wander"
+                        shade.target_lantern_id = None
+                        shade.drain_ticks = 0
             else:
                 # wander or chase
                 d_p = self._horizontal_distance(shade.pos, self.player.pos)
@@ -803,10 +894,10 @@ class SimulationEngine:
                         new_x = shade.pos[0] + dx * shade_speed * self.dt
                         new_z = shade.pos[2] + dz * shade_speed * self.dt
 
-                        # Safe zone check
+                        # Safe zone check (only lit lanterns with fuel >= 30)
                         blocked = False
                         for L in self.lanterns:
-                            if L.lit:
+                            if L.lit and L.fuel >= self.tuning.low_fuel_threshold:
                                 if math.hypot(new_x - L.pos[0], new_z - L.pos[2]) < self.tuning.safe_radius:
                                     blocked = True
                                     break
@@ -814,12 +905,38 @@ class SimulationEngine:
                             shade.pos[0] = new_x
                             shade.pos[2] = new_z
 
+                elif shade.state == "wander":
+                    # Ticket-03: Wander shade seeks weakest lantern (lit and fuel < 30)
+                    weak_lanterns = [L for L in self.lanterns if L.lit and L.fuel < self.tuning.low_fuel_threshold]
+                    target_obj = None
+                    if weak_lanterns:
+                        weak_lanterns.sort(key=lambda L: (self._horizontal_distance(shade.pos, L.pos), L.id))
+                        target_obj = weak_lanterns[0]
+                    else:
+                        unlit_lanterns = [L for L in self.lanterns if not L.lit]
+                        if unlit_lanterns:
+                            unlit_lanterns.sort(key=lambda L: (self._horizontal_distance(shade.pos, L.pos), L.id))
+                            target_obj = unlit_lanterns[0]
+
+                    if target_obj:
+                        shade.target_lantern_id = target_obj.id
+                        d_obj = self._horizontal_distance(shade.pos, target_obj.pos)
+                        if d_obj <= 2.0 and target_obj.lit and target_obj.fuel < self.tuning.low_fuel_threshold:
+                            # Chuyển sang trạng thái drain!
+                            shade.state = "drain"
+                            shade.drain_ticks = 0
+                        else:
+                            if d_obj > 0.001:
+                                dx = (target_obj.pos[0] - shade.pos[0]) / d_obj
+                                dz = (target_obj.pos[2] - shade.pos[2]) / d_obj
+                                shade.pos[0] += dx * (shade_speed * 0.6) * self.dt
+                                shade.pos[2] += dz * (shade_speed * 0.6) * self.dt
+
         # Move Drifters
         for drifter in self.drifters:
             if drifter.state == "removed":
                 continue
             elif drifter.state == "idle":
-                # Glide slowly at 2.0 m/s
                 d_p = self._horizontal_distance(drifter.pos, self.player.pos)
                 if self.player.carried >= 5 and d_p <= 15.0:
                     drifter.state = "chase"
@@ -842,10 +959,8 @@ class SimulationEngine:
 
         # -------------------------------------------------------------
         # STEP 9: Chạm
-        # Gió Lạc cướp trước, rồi Bóng Mực gây hit (xét theo id tăng dần)
         # -------------------------------------------------------------
         if self.player.fall_wait_ticks <= 0:
-            # Drifter steal
             for drifter in self.drifters:
                 if drifter.state == "chase" and not drifter.has_stolen_once:
                     d_xz = self._horizontal_distance(drifter.pos, self.player.pos)
@@ -872,7 +987,6 @@ class SimulationEngine:
                             }
                         })
 
-            # Shade hit (sorted by id ascending)
             sorted_shades = sorted(self.shades, key=lambda s: s.id)
             hit_this_tick = False
             for shade in sorted_shades:
@@ -881,7 +995,6 @@ class SimulationEngine:
                 d_xz = self._horizontal_distance(shade.pos, self.player.pos)
                 d_y = abs(shade.pos[1] - self.player.pos[1])
                 if d_xz <= self.tuning.shade_hit_radius and d_y <= 1.5:
-                    # Recoil
                     shade.state = "recoil"
                     shade.state_ticks_left = 60
                     if d_xz > 0.001:
@@ -897,7 +1010,6 @@ class SimulationEngine:
                         self.player.invuln_ticks = 90
                         self.player.invuln = True
 
-                        # Drop motes in ring 1.5 - 2.5m around player
                         for _ in range(dropped):
                             ang = self.rng.uniform(0.0, 2.0 * math.pi)
                             dist = self.rng.uniform(1.5, 2.5)
@@ -922,14 +1034,11 @@ class SimulationEngine:
                         })
 
         # -------------------------------------------------------------
-        # STEP 10: Sinh đom đóm, Bóng Mực, Gió Lạc theo lịch
-        # Thực thể mới chỉ tương tác được từ tick sau
+        # STEP 10: Sinh thực thể theo lịch
         # -------------------------------------------------------------
         if self.random_motes:
-            # Every 240 ticks, spawn 1 mote at an empty spawn point if active < 30
             active_motes_cnt = sum(1 for m in self.motes if m.active)
             if self.sim_tick > 0 and self.sim_tick % 240 == 0 and active_motes_cnt < 30:
-                # Find an empty spawn point
                 occupied_pts = [m.pos for m in self.motes if m.active]
                 available_pts = []
                 for pt in self.mote_spawn_points:
@@ -941,7 +1050,6 @@ class SimulationEngine:
                     self.next_mote_id_idx += 1
 
         if self.random_shades:
-            # Spawn shades: 2 at tick 300, then 1 every interval
             max_shades = 6 if self.night == 1 else (8 if self.night == 2 else 10)
             spawn_interval = 480 if self.night == 1 else (420 if self.night == 2 else 360)
             active_shades_cnt = len(self.shades)
@@ -967,7 +1075,6 @@ class SimulationEngine:
                     })
 
         if self.random_drifters and self.night in [2, 3]:
-            # Spawn drifters: at tick 1200, 2400... max 2 active
             active_drifters = [d for d in self.drifters if d.state != "removed"]
             if self.sim_tick > 0 and self.sim_tick % 1200 == 0 and len(active_drifters) < 2:
                 did = f"D{self.next_drifter_id_idx}"
@@ -981,9 +1088,11 @@ class SimulationEngine:
                 ))
 
         # -------------------------------------------------------------
-        # STEP 11: Xét thắng/thua
+        # STEP 11: Xét thắng/thua (Ticket-03: Luật thắng mới THAY THẾ)
+        # Hết Ngọn Lửa luôn thua no_flames trước (ngay lập tức)
+        # Thắp đủ đèn không thắng sớm
+        # Khi hết giờ: thắng nếu số đèn sáng >= ceil(0.6 * tổng đèn)
         # -------------------------------------------------------------
-        all_lit = len(self.lanterns) > 0 and all(L.lit for L in self.lanterns)
         if self.player.flames <= 0:
             if self.state == "playing":
                 self.state = "lost"
@@ -993,27 +1102,32 @@ class SimulationEngine:
                     "name": "game_over",
                     "data": {"result": "lost", "reason": "no_flames"}
                 })
-        elif all_lit:
-            if self.state == "playing":
-                self.state = "won"
-                win_time_bonus = math.floor(self.time_left_s) * self.tuning.per_second_left_score
-                win_flame_bonus = self.player.flames * self.tuning.per_flame_left_score
-                self.score += win_time_bonus + win_flame_bonus
-                self.events_this_tick.append({
-                    "type": "event",
-                    "tick": next_tick,
-                    "name": "game_over",
-                    "data": {"result": "won", "reason": "all_lit"}
-                })
         elif self.time_left_s <= 0:
             if self.state == "playing":
-                self.state = "lost"
-                self.events_this_tick.append({
-                    "type": "event",
-                    "tick": next_tick,
-                    "name": "game_over",
-                    "data": {"result": "lost", "reason": "dawn"}
-                })
+                lit_count = sum(1 for L in self.lanterns if L.lit)
+                needed_lit = math.ceil(self.tuning.win_ratio * len(self.lanterns))
+                if lit_count >= needed_lit:
+                    self.state = "won"
+                    # Ticket-03 Score at Dawn:
+                    # +50 + floor(fuel) cho mỗi đèn đang sáng
+                    # +50 cho mỗi Ngọn Lửa còn lại
+                    lanterns_bonus = sum(50 + math.floor(L.fuel) for L in self.lanterns if L.lit)
+                    flame_bonus = 50 * self.player.flames
+                    self.score += lanterns_bonus + flame_bonus
+                    self.events_this_tick.append({
+                        "type": "event",
+                        "tick": next_tick,
+                        "name": "game_over",
+                        "data": {"result": "won", "reason": "dawn_survived"}
+                    })
+                else:
+                    self.state = "lost"
+                    self.events_this_tick.append({
+                        "type": "event",
+                        "tick": next_tick,
+                        "name": "game_over",
+                        "data": {"result": "lost", "reason": "dawn"}
+                    })
 
         # -------------------------------------------------------------
         # STEP 12: Hoàn tất tick
@@ -1041,6 +1155,7 @@ class SimulationEngine:
                 "invuln": self.player.invuln,
                 "flames": self.player.flames,
                 "carried": self.player.carried,
+                "capacity": self.player.capacity,
                 "dash_cd_s": round(self.player.dash_cd_ticks / 60.0, 3),
                 "pulse_cd_s": round(self.player.pulse_cd_ticks / 60.0, 3),
                 "charm_s": round(self.player.charm_ticks_left / 60.0, 3)
@@ -1050,7 +1165,10 @@ class SimulationEngine:
                     "id": L.id,
                     "pos": [round(v, 3) for v in L.pos],
                     "lit": L.lit,
-                    "deposited": L.deposited
+                    "deposited": L.deposited,
+                    "fuel": round(L.fuel, 1) if L.lit else 0.0,
+                    "ever_lit": L.ever_lit,
+                    "relit_count": L.relit_count
                 }
                 for L in self.lanterns
             ],

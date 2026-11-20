@@ -163,3 +163,4 @@ def test_headless_full_night_performance(tmp_path):
     assert res.returncode == 0, f"Error: {res.stderr}"
     assert duration <= 30.0, f"Full night simulation must complete within 30s, took {duration:.2f}s"
     print(f"Performance: 21,600 ticks simulated in {duration:.2f} seconds!")
+
