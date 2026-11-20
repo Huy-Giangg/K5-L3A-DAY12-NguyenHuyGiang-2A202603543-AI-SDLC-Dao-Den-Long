@@ -29,6 +29,13 @@
       "seed": 100
     },
     {
+      "name": "Giang",
+      "score": 2100,
+      "nights_won": 3,
+      "achieved_at": "2026-11-21T00:15:03.127492+07:00",
+      "seed": 100
+    },
+    {
       "name": "Tester",
       "score": 1250,
       "nights_won": 3,
@@ -54,6 +61,13 @@
       "score": 1250,
       "nights_won": 3,
       "achieved_at": "2026-11-20T23:30:52.966508+07:00",
+      "seed": 42
+    },
+    {
+      "name": "Tester",
+      "score": 1250,
+      "nights_won": 3,
+      "achieved_at": "2026-11-21T00:15:03.118957+07:00",
       "seed": 42
     }
   ]

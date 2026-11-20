@@ -1,4 +1,4 @@
-﻿# Nguồn & Bản Quyền Tài Nguyên (CREDITS)
+# Nguồn & Bản Quyền Tài Nguyên (CREDITS)
 
 Dự án **Đảo Đèn Lồng (Lantern Island 3D)** cam kết tuân thủ toàn diện bản quyền phần mềm và minh bạch nguồn gốc tài nguyên:
 

@@ -13,3 +13,4 @@ Bảng ánh xạ toàn bộ các yêu cầu từ PRD-0 và các Ticket (Phase 1 
 | **Phase 4 (Ticket-04)** | Bảng xếp hạng Top 10 cục bộ, kiểm tra tên 3-12 ký tự, xuất JSON qua CLI `--export-leaderboard` | Test logic thêm, sắp xếp và cắt Top 10; test xuất file JSON từ dòng lệnh | `tests/test_phase4_features.py` | `leaderboard_export.json`<br>`data/leaderboard.json` | **100% ĐẠT** |
 | **Phase 4 (Ticket-04)** | Tính năng Dễ tiếp cận (Accessibility): Key rebinding chống trùng phím, Reduced Motion, Large Text, Visual Subtitles | Tích hợp vào Web 3D; kiểm tra khả năng lưu trữ localStorage và hiển thị HUD | `src/web/index.html` | `docs/demo/demo.mp4`<br>`src/web/index.html` | **100% ĐẠT** |
 | **All Phases** | Tính tất định (Determinism 100%) | Chạy 2 lần độc lập cùng seed và inputs; so sánh mã băm SHA-256 của toàn bộ chuỗi log | `scripts/verify_determinism.py` | `docs/proof/determinism_run1.jsonl`<br>`docs/proof/determinism_run2.jsonl` | **100% ĐẠT**<br>(SHA-256 khớp tuyệt đối) |
+

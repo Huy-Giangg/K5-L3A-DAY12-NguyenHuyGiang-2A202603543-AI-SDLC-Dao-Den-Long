@@ -1,9 +1,9 @@
 # Đảo Đèn Lồng (Lantern Island 3D) — Bản Phát Hành v1.0.0
 
 > **Dự án AI SDLC · Day 12**  
-> **Sinh viên:** Nguyễn Huy Giang — **MSSV:** 2A202603543 — **Lớp:** K5-L3A  
+> **Sinh viên:** Nguyễn Huy Giang — **MSSV:** 2A202603543 — **Lớp:** L3A  
 > **Phiên bản:** v1.0.0 (Release)  
-> **Video Demo:** [Xem video demo tại đây](docs/demo/demo.mp4) *(Kịch bản chi tiết tại [docs/demo/README.md](docs/demo/README.md))*  
+> **Video Demo:** [Xem video demo tại đây](docs/demo/demo.mp4)  
 > **Báo cáo tổng kết SDLC:** [Báo cáo Retrospective 4 Phase](docs/notes/retro.md) | [Nhật ký Token & Chi phí AI](docs/notes/ai-log.md) | [Nhật ký Thay đổi CHANGELOG](CHANGELOG.md)
 
 ---

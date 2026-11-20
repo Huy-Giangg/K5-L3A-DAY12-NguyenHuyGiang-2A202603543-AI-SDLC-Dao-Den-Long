@@ -43,3 +43,4 @@ jobs:
     - name: Run Soak Test Quick Check
       run: |
         python -m src.main --soak --seed 7 --nights 2 --out ci_soak.json
+
