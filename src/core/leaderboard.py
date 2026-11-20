@@ -56,3 +56,4 @@ def export_leaderboard(out_path: str):
     entries = get_leaderboard()
     with open(out_path, "w", encoding="utf-8") as f:
         json.dump({"entries": entries}, f, indent=2, ensure_ascii=False)
+

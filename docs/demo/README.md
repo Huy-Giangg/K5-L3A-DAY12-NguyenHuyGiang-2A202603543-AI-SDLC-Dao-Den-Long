@@ -25,3 +25,4 @@ Video trình diễn toàn diện các tính năng của dự án **Đảo Đèn 
    - Tùy biến phím bấm (Key rebinding) với cảnh báo chống trùng phím.
    - Reduced Motion (giảm rung lắc), cỡ chữ lớn (x1.25 UI), phụ đề cảnh báo trực quan.
    - Bảng xếp hạng Top 10 chiến binh đạt điểm cao nhất và xuất báo cáo qua CLI.
+

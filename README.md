@@ -96,6 +96,28 @@ Người chơi có thể kích hoạt trong menu `♿ Dễ Tiếp Cận`:
 ## 5. Quy Ước Kiến Trúc & Kỷ Luật Kỹ Nghệ
 
 1. **Decoupled Architecture:** Logic cốt lõi độc lập tại `src/core/`, không import bất kỳ thư viện đồ họa nào.
-2. **Deterministic 100%:** Cùng `seed` và chuỗi `inputs` luôn cho ra kết quả từng bit giống nhau.
+2. **Deterministic 100%:** Cùng `seed` và chuỗi `inputs` luôn cho ra kết quả từng bit giống nhau. Có thể tự kiểm chứng bằng script:
+   ```bash
+   python scripts/verify_determinism.py
+   ```
 3. **Hiệu năng cao:** Mô phỏng 21.600 ticks trong $\le 2.5$ giây, FPS đồ họa $>180$ FPS.
 4. **Bảo mật & Kỷ luật:** Tuyệt đối không commit token hay `.env`; ghi nhận đầy đủ lý do thay đổi kiểm thử vào CHANGELOG và ADR.
+5. **Ma trận truy vết:** Xem đầy đủ ánh xạ từ yêu cầu đến bằng chứng tại [Ma Trận Truy Vết](docs/proof/traceability_matrix.md).
+
+---
+
+## 6. Sáng Tạo Của Tôi (My Innovation)
+
+Nhằm tối ưu trải nghiệm người dùng mà **tuyệt đối không phá vỡ Test Contract** hay làm thay đổi đầu ra mô phỏng headless, dự án tích hợp 3 sáng tạo kỹ thuật độc đáo:
+
+1. **Hệ Thống Âm Thanh Thủ Tục Thuần (Zero-Asset Procedural Audio):**
+   - Thay vì tải các tệp âm thanh `.mp3` / `.wav` cồng kềnh, game áp dụng Web Audio API để tổng hợp trực tiếp tần số âm thanh từ mã JavaScript (sóng sin cho tiếng đom đóm, triangle cho tiếng nhảy bục, tam âm cho lúc thắp đèn lồng lớn).
+   - *Lợi ích:* Kích thước tải trang **0 KB**, độ trễ phát âm **0 ms**, độc lập 100% không lo lỗi 404 tài nguyên mạng.
+
+2. **Cơ Chế Trợ Năng Đa Tầng Ngăn Ngừa Xung Đột Phím (Key Conflict Prevention Engine):**
+   - Bảng tùy biến phím bấm (Key Rebinding) được tích hợp thuật toán kiểm tra xung đột thời gian thực: khi gán một phím đã được dùng cho hành động khác, hệ thống cảnh báo đỏ và ngăn chặn ghi đè để bảo vệ người chơi không bị kẹt điều khiển.
+   - Kết hợp chỉ báo thị giác (Visual Subtitles) phát tín hiệu chữ nổi khi Bóng Mực áp sát hoặc khi Đèn sắp cạn dầu, hỗ trợ tối đa cho game thủ khiếm thính hoặc chơi trong môi trường yên tĩnh.
+
+3. **Chế Độ Mù Màu Trợ Năng (Colorblind Mode):**
+   - Bổ sung tùy chọn chuyển đổi màu sắc có độ tương phản cao, tăng cường viền sáng phát quang cho Đèn Lồng và Bóng Mực giúp người chơi có thị giác màu kém dễ dàng phân biệt trạng thái trong đêm tối.
+

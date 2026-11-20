@@ -142,3 +142,4 @@ def run_benchmark(args_list: Optional[List[str]] = None) -> int:
 
     print(f"Benchmark completed: avg_fps={avg_fps}, p1_low_fps={p1_low_fps}, frames={N}, peak_mem_mb={peak_mem_mb}")
     return 0
+

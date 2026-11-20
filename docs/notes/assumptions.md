@@ -44,4 +44,26 @@ Ticket-03 là Change Request cốt lõi, thay thế các luật chơi cũ:
 
 ### B. Quyết định kỹ thuật quan trọng
 1. **Tránh sai số dấu phẩy động:** Tính toán hao hụt dầu theo tỉ lệ mỗi tick ($1/60$ và $5/60$). Ngưỡng kiểm tra hết dầu được làm tròn với sai số $\le 10^{-5}$ để đảm bảo chuyển trạng thái đèn tắt dứt khoát.
-2. **Cập nhật hồi quy kiểm thử:** Các test case cũ kỳ vọng chiến thắng tức thời khi thắp đủ 5 đèn được điều chỉnh sang kiểm thử điều kiện bình minh (`dawn_survived`) theo đúng [ADR-001](file:///d:/VinAI/prj/Day12/K5-L3A-DAY12-NguyenHuyGiang-2A202603543-AI-SDLC-Dao-Den-Long/docs/adr/ADR-001-fuel-and-dawn-win.md).
+2. **Cập nhật hồi quy kiểm thử:** Các test case cũ kỳ vọng chiến thắng tức thời khi thắp đủ 5 đèn được điều chỉnh sang kiểm thử điều kiện bình minh (`dawn_survived`) theo đúng [ADR-001](../adr/ADR-001-fuel-and-dawn-win.md).
+
+---
+
+## 4. Phase 4 (TICKET-04) — Phi chức năng & Phát hành v1.0.0
+
+### A. Giả định chế độ Benchmark
+1. **Cấu hình tải nặng:** Chạy đúng 200 Bóng Mực (Shades) ở trạng thái `wander`, 100 Đom đóm (Motes), 3 đèn lồng sáng với 100 dầu. Camera quay quỹ đạo quanh tâm đảo bán kính 40m trong thời gian chỉ định (`--duration 30`).
+2. **Đo đạc chỉ số:** `avg_fps` tính theo tổng tick chia cho thời gian; `p1_low_fps` tính theo phân vị 1% thời gian khung hình; `peak_mem_mb` đo bằng `psutil.Process().memory_info().rss`.
+3. **Ngưỡng đạt:** `avg_fps >= 60.0`, `p1_low_fps >= 30.0`, `load_ms <= 10000`.
+
+### B. Giả định chế độ Soak Test
+1. **Mô phỏng dài hạn:** Chạy 10 đêm xoay vòng liên tục (1 -> 2 -> 3 -> 1 -> 2 -> 3...). Input được điều khiển ngẫu nhiên từ RNG seed (`seed=7`).
+2. **Ngưỡng đạt rò rỉ bộ nhớ:** `crashes == 0` và `mem_end_mb <= 1.2 * mem_start_mb`.
+
+### C. Giả định Bảng xếp hạng (Leaderboard)
+1. **Quy tắc tên:** Độ dài từ 3 đến 12 ký tự, cho phép chữ cái (kể cả tiếng Việt có dấu), chữ số, khoảng trắng và gạch dưới. Tự động loại bỏ ký tự đặc biệt nguy hiểm để phòng ngừa XSS.
+2. **Xếp hạng:** Sắp xếp giảm dần theo điểm số. Khi bằng điểm, người đạt kỷ lục sớm hơn được xếp trên (FIFO stable sort). Lưu trữ tối đa Top 10.
+
+### D. Giả định Trợ năng (Accessibility)
+1. **Key Rebinding:** Người chơi có thể gán phím tùy ý cho 8 hành động cơ bản. Nếu người chơi gán trùng phím với một hành động khác đã tồn tại, hệ thống lập tức cảnh báo xung đột và ngăn chặn ghi đè để đảm bảo không bị mất điều khiển.
+2. **Reduced Motion:** Làm mượt chuyển động camera với hệ số lerp 0.05, loại bỏ hiệu ứng rung màn hình khi va chạm.
+3. **Visual Indicators:** Hiển thị cảnh báo chữ nổi và viền màu khi quái vật tiếp cận $\le 6.0$m hoặc khi đèn lồng còn dưới 25% dầu.

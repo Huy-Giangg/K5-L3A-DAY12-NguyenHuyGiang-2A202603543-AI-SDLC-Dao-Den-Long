@@ -106,3 +106,4 @@ def run_soak_test(args_list: Optional[List[str]] = None) -> int:
 
     print(f"Soak test completed: nights={total_nights}, crashes={crashes}, mem_start={mem_start_mb}MB, mem_end={mem_end_mb}MB, duration={duration_s}s")
     return 0
+

@@ -1,0 +1,45 @@
+name: CI - Dao Den Long Automated Verification
+
+on:
+  push:
+    branches: [ main ]
+    tags: [ 'v*', 'phase-*' ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    name: Run Pytest & Test Contract v1.3 Verification
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Set up Python 3.11
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.11"
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
+    - name: Run Pytest Suite (36 Tests)
+      run: |
+        pytest -v
+
+    - name: Verify Headless Engine & Determinism
+      run: |
+        python -m src.main --headless --night 1 --ticks 120 --seed 42 --out ci_run1.jsonl
+        python -m src.main --headless --night 1 --ticks 120 --seed 42 --out ci_run2.jsonl
+        cmp ci_run1.jsonl ci_run2.jsonl
+
+    - name: Run Benchmark Quick Check
+      run: |
+        python -m src.main --benchmark --seed 42 --duration 2 --out ci_bench.json
+
+    - name: Run Soak Test Quick Check
+      run: |
+        python -m src.main --soak --seed 7 --nights 2 --out ci_soak.json
