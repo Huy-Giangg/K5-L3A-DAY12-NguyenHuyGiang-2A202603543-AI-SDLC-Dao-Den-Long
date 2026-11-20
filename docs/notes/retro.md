@@ -53,7 +53,7 @@ Dự án **Đảo Đèn Lồng** là một bài thực hành toàn diện về q
 | :--- | :---: | :---: | :---: |
 | **Số bài kiểm thử tự động** | $\ge 30$ tests | **36 tests passed 100%** | **VƯỢT CHỈ TIÊU** |
 | **Thời gian chạy bộ test** | $\le 10$ giây | **6.85 giây** | **ĐẠT XUẤT SẮC** |
-| **Tính tất định (Determinism)** | 100% cùng seed | **100% giống nhau từng bit** | **HOÀN HẢO** |
+| **Tính tất định (Determinism)** | 100% cùng seed | **100% giống nhau từng bit (SHA-256 khớp)** | **HOÀN HẢO** |
 | **Tốc độ Benchmark trung bình** | $\ge 60.0$ FPS | **183.8 FPS** | **GẤP 3.0 LẦN** |
 | **1% Low FPS** | $\ge 30.0$ FPS | **152.0 FPS** | **GẤP 5.0 LẦN** |
 | **Thời gian tải ban đầu** | $\le 10.000$ ms | **0 ms (tức thời)** | **ĐẠT XUẤT SẮC** |
@@ -72,4 +72,26 @@ Dự án **Đảo Đèn Lồng** là một bài thực hành toàn diện về q
 - **Vai trò chỉ đạo của Kỹ sư (Human-in-the-loop):**
   - Đưa ra quyết định định hướng khi có xung đột yêu cầu (như lựa chọn luật thắng bình minh thay vì luật thắng tức thời).
   - Giám sát nghiêm ngặt kỷ luật kỹ nghệ: không để AI tự ý bỏ qua test, bắt buộc giải trình lý do trong ADR và CHANGELOG, yêu cầu bằng chứng số liệu chạy thật.
-- **Kết luận:** Mô hình AI SDLC áp dụng vào dự án "Đảo Đèn Lồng" đã hoàn thành xuất sắc mục tiêu, đưa sản phẩm từ ý tưởng sơ khởi đến phiên bản phát hành thương mại **v1.0.0** chuẩn mực, ổn định và sẵn sàng bàn giao.
+
+---
+
+## 6. Retro Ngắn Gọn Theo Tiêu Chí Checkpoint 5 (5 Trọng Tâm)
+
+1. **Điều gì hiệu quả hoặc không khi làm với AI:**
+   - *Hiệu quả:* AI viết scaffold mô hình hóa toán học cực nhanh; sinh bộ test cases bao phủ các biên phức tạp (nhảy bục, gió giật, cạn dầu); dựng giao diện Three.js và Web Audio thủ tục không lỗi cú pháp.
+   - *Không hiệu quả:* AI dễ có xu hướng "giả định ngầm" (ví dụ trừ dầu bằng phép trừ số thực vô tư gây sai số $1e-18$, hoặc sinh hàm ngẫu nhiên không neo theo seed nếu không bị nhắc nhở). Kỹ sư phải luôn giữ vai trò đặt guardrails.
+2. **Những lần AI sai và cách phát hiện:**
+   - *Lần 1 (Phase 3):* Trừ dầu mỗi tick $1/60$ dẫn đến dư số thực $6.9 \times 10^{-18} > 0$ khiến đèn không tắt đúng tick 180. -> **Phát hiện:** Unit test kiểm tra trạng thái đèn bị FAILED. -> **Khắc phục:** Thêm ngưỡng epsilon `if L.fuel <= 1e-5:`.
+   - *Lần 2 (Phase 2):* Đẩy lùi quái vật (Pulse) bị AI viết tức thời 1 tick thay vì chia đều trong 15 ticks như Ticket-02. -> **Phát hiện:** Kiểm tra chéo với đặc tả contract. -> **Khắc phục:** Viết hàm phụ trợ `apply_impulse()` chia nhỏ vector 15 tick.
+   - *Lần 3 (Phase 3):* Test cũ giữ nguyên assert `all_lit` gây fail khi đổi sang luật thắng bình minh. -> **Phát hiện:** Pytest báo đỏ. -> **Khắc phục:** Cập nhật test sang `dawn_survived` và giải trình chi tiết vào [ADR-001](../adr/ADR-001-fuel-and-dawn-win.md).
+3. **Harness nào giúp nhiều nhất:**
+   - File [AGENTS.md](../../AGENTS.md): Đóng vai trò kim chỉ nam ngăn AI commit file rác, cấm giả mạo log, bắt buộc tính tất định.
+   - Test Contract [game.contract.json](../../game.contract.json): Định hình khung giao tiếp chuẩn mực giữa logic và harness.
+   - Script tự động [scripts/verify_determinism.py](../../scripts/verify_determinism.py) và CI [.github/workflows/ci.yml](../../.github/workflows/ci.yml): Loại bỏ hoàn toàn sự phụ thuộc vào trí nhớ thủ công.
+4. **Token/chi phí ước tính và cách tiết kiệm:**
+   - *Tổng lượng token:* ~178.000 tokens cho cả 4 Phase.
+   - *Chi phí:* ~$0.077 USD (< 0.10 USD) nhờ sử dụng mô hình Gemini 3.8 Flash tối ưu.
+   - *Cách tiết kiệm:* Prompt ngắn gọn, phân tích diff trước khi sinh code, gom lệnh đọc/ghi vào một turn duy nhất, không gọi lặp các file tĩnh đã đọc.
+5. **Nếu làm lại từ đầu thì đổi gì:**
+   - Xây dựng công cụ kiểm tra tính tất định bằng hash SHA-256 ngay từ Checkpoint 0 thay vì đợi đến Phase 4.
+   - Chuẩn hóa hệ thống thời gian và tài nguyên sang số nguyên (integer ticks / millifuel) để triệt tiêu vĩnh viễn rủi ro sai số dấu phẩy động.
