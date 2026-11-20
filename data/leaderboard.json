@@ -1,0 +1,46 @@
+{
+  "entries": [
+    {
+      "name": "Giang",
+      "score": 2100,
+      "nights_won": 3,
+      "achieved_at": "2026-11-20T23:18:32.286346+07:00",
+      "seed": 100
+    },
+    {
+      "name": "Giang",
+      "score": 2100,
+      "nights_won": 3,
+      "achieved_at": "2026-11-20T23:18:46.896970+07:00",
+      "seed": 100
+    },
+    {
+      "name": "Giang",
+      "score": 2100,
+      "nights_won": 3,
+      "achieved_at": "2026-11-20T23:23:28.161029+07:00",
+      "seed": 100
+    },
+    {
+      "name": "Tester",
+      "score": 1250,
+      "nights_won": 3,
+      "achieved_at": "2026-11-20T23:18:32.277820+07:00",
+      "seed": 42
+    },
+    {
+      "name": "Tester",
+      "score": 1250,
+      "nights_won": 3,
+      "achieved_at": "2026-11-20T23:18:46.888421+07:00",
+      "seed": 42
+    },
+    {
+      "name": "Tester",
+      "score": 1250,
+      "nights_won": 3,
+      "achieved_at": "2026-11-20T23:23:28.153059+07:00",
+      "seed": 42
+    }
+  ]
+}

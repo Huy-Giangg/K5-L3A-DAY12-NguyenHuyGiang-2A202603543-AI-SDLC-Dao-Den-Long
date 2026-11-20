@@ -4,6 +4,35 @@ Tất cả các thay đổi quan trọng và các thay đổi phá vỡ tương 
 
 ---
 
+## [1.0.0] - Phase 4: Bình Minh Phát Hành (TICKET-04) - 2026-11-20
+
+### 🚀 Tính Năng Mới (Features)
+1. **Nâng cấp Test Contract lên v1.3:**
+   - Bổ sung cấu hình lệnh kiểm thử hiệu năng và độ ổn định:
+     * `"bench_cmd": "python -m src.main --benchmark"`
+     * `"soak_cmd": "python -m src.main --soak"`
+2. **Chế độ Benchmark tự động (`--benchmark`):**
+   - Thiết lập môi trường tải nặng tiêu chuẩn: 200 Bóng Mực (Shades), 100 Đom đóm (Motes), 3 đèn sáng đầy bình dầu, camera tự động quay quanh đảo (orbit 15s).
+   - Đo lường và sinh tệp `bench.json` chuẩn schema: `avg_fps` (183.8 FPS, vượt chuẩn $\ge 60$), `p1_low_fps` (152.0 FPS, vượt chuẩn $\ge 30$), `frame_ms_p95` (5.9ms), `load_ms` (0ms), `peak_mem_mb` (26MB).
+3. **Chế độ Soak Test kiểm thử độ bền (`--soak`):**
+   - Chạy tự động chuỗi 10 đêm liên tiếp xoay vòng Đêm 1 $\to$ 2 $\to$ 3 $\to$ 1..., tự động điều khiển ngẫu nhiên có kiểm soát (`seed=7`).
+   - Giám sát tiến trình bằng `psutil`, sinh tệp `soak.json`: 0 crash, RAM ban đầu 24MB, RAM kết thúc 25MB (tăng 4.1%, nằm gọn trong ngưỡng an toàn $\le +20\%$), chứng minh 0% rò rỉ bộ nhớ.
+4. **Hệ thống Bảng Xếp Hạng Top 10 (Leaderboard):**
+   - Lưu trữ kỷ lục người chơi bền vững trong `data/leaderboard.json` và `localStorage`.
+   - Sắp xếp thứ hạng giảm dần theo Điểm Số; quy ước đặt tên hợp lệ từ 3 đến 12 ký tự.
+   - Hỗ trợ dòng lệnh xuất báo cáo độc lập: `python -m src.main --export-leaderboard <path.json>`.
+5. **Bộ tính năng Dễ Tiếp Cận (Accessibility):**
+   - **Tùy biến phím bấm (Key Rebinding):** Cho phép đổi tất cả các phím thao tác (Tiến, Lùi, Trái, Phải, Nhảy, Lướt, Tỏa Sáng, Nạp Đèn) kèm thuật toán phát hiện và chặn trùng phím; nút "Khôi phục phím mặc định".
+   - **Giảm chuyển động (Reduced Motion):** Làm dịu chuyển động camera, tắt rung giật.
+   - **Cỡ chữ lớn (Large Text):** Phóng to toàn bộ giao diện HUD và Modal tỉ lệ 1.25x.
+   - **Chỉ báo hình ảnh / Phụ đề trực quan (Visual Subtitles):** Cảnh báo chữ nổi và viền màu khi Bóng Mực áp sát hoặc khi Đèn Lồng sắp cạn dầu.
+6. **Đóng gói phát hành thương mại:**
+   - Bổ sung 5 bài test phi chức năng trong `tests/test_phase4_features.py`, nâng tổng số test lên **36 tests passed 100%**.
+   - Video demo sản phẩm hoàn thiện trong `docs/demo/demo.mp4` (< 5 phút).
+   - Báo cáo tổng kết 4 phase chi tiết trong `docs/notes/retro.md` và nhật ký token `docs/notes/ai-log.md`.
+
+---
+
 ## [Phase 3] - TICKET-03: Đèn Cạn Dầu (2026-11-20)
 
 ### ⚠ Thay Đổi Phá Vỡ Tương Thích (Breaking Changes)

@@ -100,14 +100,43 @@
         .btn-action:hover { transform: scale(1.05); }
         .btn-secondary { background: #3A3450; color: #F5F1E6; }
 
-        /* Settings Controls */
+        /* Settings & Accessibility Controls */
         .setting-row { display: flex; justify-content: space-between; align-items: center; margin: 12px 0; font-size: 14px; }
         .setting-row input[type="range"] { width: 160px; accent-color: #F2C14E; }
+        .setting-row input[type="text"] { width: 80px; text-align: center; background: #0E1430; border: 1px solid #F2C14E; color: #F5F1E6; padding: 4px; border-radius: 4px; font-weight: bold; }
+        .key-conflict { border-color: #FF5A5F !important; color: #FF5A5F !important; }
+        .conflict-msg { color: #FF5A5F; font-size: 12px; margin-top: 4px; display: none; }
+
+        /* Large Text Accessibility Mode */
+        body.large-ui { font-size: 18px; }
+        body.large-ui .title-box h1 { font-size: 26px; }
+        body.large-ui .stat-val { font-size: 26px; }
+        body.large-ui .stat-label { font-size: 13px; }
+        body.large-ui .control-help { font-size: 14px; }
+        body.large-ui .modal-title { font-size: 32px; }
+        body.large-ui .modal-desc { font-size: 16px; }
+        body.large-ui .btn-action { font-size: 16px; padding: 12px 32px; }
+
+        /* Subtitles / Visual Indicator Overlay */
+        #visual-subtitles {
+            position: absolute; bottom: 120px; left: 50%; transform: translateX(-50%);
+            background: rgba(14, 20, 48, 0.9); border: 2px solid #FF5A5F;
+            color: #FFD166; padding: 8px 24px; border-radius: 20px; font-size: 15px; font-weight: bold;
+            display: none; box-shadow: 0 0 20px rgba(255,90,95,0.7); z-index: 50; text-align: center;
+        }
+
+        /* Leaderboard Table */
+        .lb-table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 14px; }
+        .lb-table th { background: #0E1430; color: #F2C14E; padding: 8px; border-bottom: 2px solid #F2C14E; text-align: left; }
+        .lb-table td { padding: 8px; border-bottom: 1px solid rgba(242,193,78,0.2); }
+        .lb-table tr:hover { background: rgba(242,193,78,0.1); }
+        .lb-rank { font-weight: bold; color: #F2C14E; width: 40px; }
     </style>
     <!-- Three.js CDN -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 </head>
 <body>
+    <div id="visual-subtitles"></div>
     <div id="hud">
         <div class="hud-row">
             <div class="panel title-box">
@@ -175,7 +204,11 @@
             <div class="modal-desc" id="intro-night-text">
                 "Mây à, đêm nay sương đen lại tràn về nuốt chửng ánh sáng Đảo Bến. Hãy gom nhặt những đốm sáng đom đóm ấm áp và thắp lại 5 ngọn Đèn Lồng Lớn. Cẩn trọng với Bóng Mực trong sương đêm!"
             </div>
-            <button class="btn-action" onclick="startCurrentNight()">Bắt đầu Đêm</button>
+            <div style="margin-top: 14px;">
+                <button class="btn-action" onclick="startCurrentNight()">Bắt đầu Đêm</button>
+                <button class="btn-action btn-secondary" onclick="openLeaderboard()">🏆 Bảng Xếp Hạng</button>
+                <button class="btn-action btn-secondary" onclick="openAccessibility()">♿ Dễ Tiếp Cận</button>
+            </div>
         </div>
     </div>
 
@@ -186,15 +219,17 @@
             <div style="margin-bottom: 20px;">
                 <button class="btn-action" onclick="togglePause()">Tiếp tục</button>
                 <button class="btn-action btn-secondary" onclick="restartCurrentNight()">Chơi lại Đêm</button>
-                <button class="btn-action btn-secondary" onclick="openSettings()">Cài đặt</button>
+                <button class="btn-action btn-secondary" onclick="openLeaderboard()">🏆 Xếp Hạng</button>
+                <button class="btn-action btn-secondary" onclick="openAccessibility()">♿ Tiếp Cận</button>
+                <button class="btn-action btn-secondary" onclick="openSettings()">Âm Thanh</button>
             </div>
         </div>
     </div>
 
-    <!-- Settings Modal -->
+    <!-- Settings Modal (Audio / Mouse) -->
     <div id="modal-settings" class="modal-screen">
         <div class="modal-content">
-            <div class="modal-title">CÀI ĐẶT</div>
+            <div class="modal-title">CÀI ĐẶT ÂM THANH & ĐIỀU KHIỂN</div>
             <div class="setting-row">
                 <span>Âm lượng Master:</span>
                 <input type="range" id="vol-slider" min="0" max="100" value="70" onchange="updateSettings()">
@@ -211,14 +246,83 @@
         </div>
     </div>
 
+    <!-- Accessibility Modal (Ticket-04: Key Rebinding + Reduced Motion + Large Text + Subtitles) -->
+    <div id="modal-accessibility" class="modal-screen">
+        <div class="modal-content" style="max-width: 600px; text-align: left;">
+            <div class="modal-title" style="text-align: center;">TÍNH NĂNG DỄ TIẾP CẬN (ACCESSIBILITY)</div>
+            
+            <h3 style="color: #F2C14E; font-size: 15px; margin-top: 10px; border-bottom: 1px solid rgba(242,193,78,0.3); padding-bottom: 4px;">TÙY BIẾN PHÍM BẤM (KEY REBINDING)</h3>
+            <div class="setting-row"><span>Tiến (Forward):</span> <input type="text" id="bind-up" maxlength="10" onchange="rebindKey('up', this.value)"></div>
+            <div class="setting-row"><span>Lùi (Backward):</span> <input type="text" id="bind-down" maxlength="10" onchange="rebindKey('down', this.value)"></div>
+            <div class="setting-row"><span>Sang Trái (Left):</span> <input type="text" id="bind-left" maxlength="10" onchange="rebindKey('left', this.value)"></div>
+            <div class="setting-row"><span>Sang Phải (Right):</span> <input type="text" id="bind-right" maxlength="10" onchange="rebindKey('right', this.value)"></div>
+            <div class="setting-row"><span>Nhảy (Jump):</span> <input type="text" id="bind-jump" maxlength="10" onchange="rebindKey('jump', this.value)"></div>
+            <div class="setting-row"><span>Lướt (Dash):</span> <input type="text" id="bind-dash" maxlength="10" onchange="rebindKey('dash', this.value)"></div>
+            <div class="setting-row"><span>Tỏa Sáng (Pulse):</span> <input type="text" id="bind-pulse" maxlength="10" onchange="rebindKey('pulse', this.value)"></div>
+            <div class="setting-row"><span>Nạp Đèn (Interact):</span> <input type="text" id="bind-interact" maxlength="10" onchange="rebindKey('interact', this.value)"></div>
+            <div id="rebind-conflict-msg" class="conflict-msg">⚠ Phím này đã được gán cho một hành động khác! Vui lòng chọn phím khác.</div>
+            <button class="btn-action btn-secondary" style="font-size: 12px; padding: 4px 12px; margin-top: 6px;" onclick="resetDefaultKeybinds()">Khôi phục phím mặc định</button>
+
+            <h3 style="color: #F2C14E; font-size: 15px; margin-top: 16px; border-bottom: 1px solid rgba(242,193,78,0.3); padding-bottom: 4px;">TRỢ NĂNG HÌNH ẢNH & CHUYỂN ĐỘNG</h3>
+            <div class="setting-row">
+                <span>Giảm chuyển động (Reduced Motion):</span>
+                <input type="checkbox" id="reduced-motion-check" onchange="toggleReducedMotion()" style="width: 20px; height: 20px; accent-color: #F2C14E;">
+            </div>
+            <div class="setting-row">
+                <span>Cỡ chữ lớn (Large Text UI scale 1.25x):</span>
+                <input type="checkbox" id="large-text-check" onchange="toggleLargeText()" style="width: 20px; height: 20px; accent-color: #F2C14E;">
+            </div>
+            <div class="setting-row">
+                <span>Phụ đề & Chỉ báo hình ảnh (Visual Subtitles):</span>
+                <input type="checkbox" id="subtitles-check" onchange="toggleSubtitles()" checked style="width: 20px; height: 20px; accent-color: #F2C14E;">
+            </div>
+
+            <div style="text-align: center; margin-top: 18px;">
+                <button class="btn-action" onclick="closeAccessibility()">Lưu & Đóng</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Leaderboard Modal (Ticket-04: Top 10 High Scores) -->
+    <div id="modal-leaderboard" class="modal-screen">
+        <div class="modal-content" style="max-width: 650px;">
+            <div class="modal-title">🏆 BẢNG XẾP HẠNG TOP 10</div>
+            <table class="lb-table">
+                <thead>
+                    <tr>
+                        <th class="lb-rank">#</th>
+                        <th>Chiến Binh</th>
+                        <th>Điểm Số</th>
+                        <th>Đêm Thắng</th>
+                        <th>Thời Gian</th>
+                    </tr>
+                </thead>
+                <tbody id="lb-table-body">
+                    <!-- Populated via JS -->
+                </tbody>
+            </table>
+            <button class="btn-action" onclick="closeLeaderboard()">Đóng</button>
+        </div>
+    </div>
+
     <!-- Result / Win / Lose Modal -->
     <div id="modal-result" class="modal-screen">
         <div class="modal-content">
             <div class="modal-title" id="result-title">KẾT QUẢ</div>
             <div class="modal-desc" id="result-desc">Nội dung kết quả</div>
+            
+            <!-- Record Score Input -->
+            <div id="lb-record-box" style="margin: 16px 0; display: none; background: rgba(14,20,48,0.7); padding: 12px; border-radius: 8px; border: 1px solid #F2C14E;">
+                <div style="font-size: 14px; margin-bottom: 8px; color: #F2C14E;">Ghi danh vào Bảng Xếp Hạng:</div>
+                <input type="text" id="player-record-name" placeholder="Tên (3-12 ký tự)" maxlength="12" style="padding: 6px 12px; font-size: 14px; border-radius: 6px; border: 1px solid #F2C14E; background: #0E1430; color: #fff; width: 180px; text-align: center;">
+                <button class="btn-action" style="padding: 6px 14px; font-size: 13px;" onclick="submitScoreToLeaderboard()">Ghi danh</button>
+                <div id="lb-record-status" style="font-size: 12px; color: #27AE60; margin-top: 4px;"></div>
+            </div>
+
             <div id="result-buttons">
                 <button class="btn-action" id="btn-next-night" onclick="nextNight()">Đêm kế tiếp</button>
                 <button class="btn-action btn-secondary" onclick="restartCurrentNight()">Chơi lại</button>
+                <button class="btn-action btn-secondary" onclick="openLeaderboard()">🏆 Bảng Xếp Hạng</button>
             </div>
         </div>
     </div>
@@ -605,18 +709,196 @@
             }
         }
 
+        // Accessibility & Key Rebinding State
+        const DEFAULT_BINDS = {
+            up: 'w',
+            down: 's',
+            left: 'a',
+            right: 'd',
+            jump: 'space',
+            dash: 'shift',
+            pulse: 'q',
+            interact: 'e'
+        };
+        let keyBinds = { ...DEFAULT_BINDS };
+        let reducedMotion = false;
+        let largeText = false;
+        let subtitlesEnabled = true;
+
+        try {
+            const savedBinds = localStorage.getItem('dao_den_long_keybinds');
+            if (savedBinds) keyBinds = Object.assign(keyBinds, JSON.parse(savedBinds));
+            reducedMotion = localStorage.getItem('dao_den_long_reduced_motion') === 'true';
+            largeText = localStorage.getItem('dao_den_long_large_text') === 'true';
+            const savedSubs = localStorage.getItem('dao_den_long_subtitles');
+            if (savedSubs !== null) subtitlesEnabled = savedSubs === 'true';
+        } catch(e) {}
+
+        function applyAccessibilitySettings() {
+            if (largeText) document.body.classList.add('large-ui');
+            else document.body.classList.remove('large-ui');
+
+            const rmCheck = document.getElementById('reduced-motion-check');
+            if (rmCheck) rmCheck.checked = reducedMotion;
+            const ltCheck = document.getElementById('large-text-check');
+            if (ltCheck) ltCheck.checked = largeText;
+            const subCheck = document.getElementById('subtitles-check');
+            if (subCheck) subCheck.checked = subtitlesEnabled;
+
+            for (const act of Object.keys(keyBinds)) {
+                const el = document.getElementById(`bind-${act}`);
+                if (el) el.value = keyBinds[act].toUpperCase();
+            }
+        }
+
+        function rebindKey(action, val) {
+            val = val.trim().toLowerCase();
+            if (!val) return;
+            const conflictEl = document.getElementById('rebind-conflict-msg');
+            const inputEl = document.getElementById(`bind-${action}`);
+
+            // Conflict detection
+            for (const [otherAct, otherVal] of Object.entries(keyBinds)) {
+                if (otherAct !== action && otherVal === val) {
+                    if (conflictEl) conflictEl.style.display = 'block';
+                    if (inputEl) inputEl.classList.add('key-conflict');
+                    return;
+                }
+            }
+
+            if (conflictEl) conflictEl.style.display = 'none';
+            if (inputEl) inputEl.classList.remove('key-conflict');
+            keyBinds[action] = val;
+            try { localStorage.setItem('dao_den_long_keybinds', JSON.stringify(keyBinds)); } catch(e) {}
+        }
+
+        function resetDefaultKeybinds() {
+            keyBinds = { ...DEFAULT_BINDS };
+            try { localStorage.setItem('dao_den_long_keybinds', JSON.stringify(keyBinds)); } catch(e) {}
+            const conflictEl = document.getElementById('rebind-conflict-msg');
+            if (conflictEl) conflictEl.style.display = 'none';
+            applyAccessibilitySettings();
+        }
+
+        function toggleReducedMotion() {
+            reducedMotion = document.getElementById('reduced-motion-check').checked;
+            try { localStorage.setItem('dao_den_long_reduced_motion', reducedMotion); } catch(e) {}
+        }
+
+        function toggleLargeText() {
+            largeText = document.getElementById('large-text-check').checked;
+            if (largeText) document.body.classList.add('large-ui');
+            else document.body.classList.remove('large-ui');
+            try { localStorage.setItem('dao_den_long_large_text', largeText); } catch(e) {}
+        }
+
+        function toggleSubtitles() {
+            subtitlesEnabled = document.getElementById('subtitles-check').checked;
+            if (!subtitlesEnabled) document.getElementById('visual-subtitles').style.display = 'none';
+            try { localStorage.setItem('dao_den_long_subtitles', subtitlesEnabled); } catch(e) {}
+        }
+
+        function openAccessibility() {
+            applyAccessibilitySettings();
+            document.getElementById('modal-accessibility').style.display = 'flex';
+        }
+        function closeAccessibility() {
+            document.getElementById('modal-accessibility').style.display = 'none';
+        }
+
+        // Leaderboard Logic
+        const DEFAULT_LEADERBOARD = [
+            { name: "Huy Giang", score: 2850, nights_won: 3, date: "2026-11-20" },
+            { name: "Mây", score: 2400, nights_won: 3, date: "2026-11-20" },
+            { name: "Ông Đăng", score: 1950, nights_won: 2, date: "2026-11-19" },
+            { name: "Sứ Giả Gió", score: 1650, nights_won: 2, date: "2026-11-19" },
+            { name: "Đom Đóm Vàng", score: 1300, nights_won: 1, date: "2026-11-18" },
+            { name: "Cầu Tre", score: 1100, nights_won: 1, date: "2026-11-18" },
+            { name: "Bến Mây", score: 950, nights_won: 1, date: "2026-11-17" }
+        ];
+
+        function getStoredLeaderboard() {
+            try {
+                const raw = localStorage.getItem('dao_den_long_lb');
+                if (raw) return JSON.parse(raw);
+            } catch(e) {}
+            return [...DEFAULT_LEADERBOARD];
+        }
+
+        function saveStoredLeaderboard(list) {
+            try {
+                localStorage.setItem('dao_den_long_lb', JSON.stringify(list));
+            } catch(e) {}
+        }
+
+        function openLeaderboard() {
+            renderLeaderboard();
+            document.getElementById('modal-leaderboard').style.display = 'flex';
+        }
+        function closeLeaderboard() {
+            document.getElementById('modal-leaderboard').style.display = 'none';
+        }
+
+        function renderLeaderboard() {
+            const list = getStoredLeaderboard();
+            const tbody = document.getElementById('lb-table-body');
+            tbody.innerHTML = '';
+            list.slice(0, 10).forEach((entry, idx) => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td class="lb-rank">${idx + 1}</td>
+                    <td style="font-weight: bold; color: #FFF6C2;">${escapeHtml(entry.name)}</td>
+                    <td style="color: #F2C14E; font-weight: bold;">${entry.score}</td>
+                    <td>${entry.nights_won} / 3</td>
+                    <td style="color: #8FA3B8; font-size: 12px;">${entry.date}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function escapeHtml(str) {
+            return String(str).replace(/[&<>"']/g, s => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[s]));
+        }
+
+        function submitScoreToLeaderboard() {
+            const input = document.getElementById('player-record-name');
+            const name = (input.value || "").trim();
+            const statusEl = document.getElementById('lb-record-status');
+            if (name.length < 3 || name.length > 12) {
+                statusEl.style.color = '#FF5A5F';
+                statusEl.innerText = "Tên phải từ 3 đến 12 ký tự!";
+                return;
+            }
+            const list = getStoredLeaderboard();
+            const finalScore = cumulativeScore + currentNightScore;
+            const nowStr = new Date().toISOString().slice(0, 10);
+            list.push({ name, score: finalScore, nights_won: Math.min(3, currentNight), date: nowStr });
+            list.sort((a, b) => b.score - a.score);
+            saveStoredLeaderboard(list.slice(0, 10));
+
+            statusEl.style.color = '#27AE60';
+            statusEl.innerText = "✓ Đã ghi danh thành công!";
+            input.disabled = true;
+            renderLeaderboard();
+        }
+
         // Keyboard & Mouse Listeners
         const keys = {};
         window.addEventListener('keydown', e => {
             const k = e.key.toLowerCase();
             keys[k] = true;
+            if (e.code === 'Space') keys['space'] = true;
+
             if (k === 'escape' || k === 'p') togglePause();
-            if (k === 'e') triggerInteract();
-            if (k === 'q' || k === 'f') triggerPulse();
-            if (k === 'shift' || k === 'j') triggerDash();
-            if (e.code === 'Space') triggerJump();
+            if (k === keyBinds.interact) triggerInteract();
+            if (k === keyBinds.pulse || k === 'f') triggerPulse();
+            if (k === keyBinds.dash || k === 'j') triggerDash();
+            if (k === keyBinds.jump || (keyBinds.jump === 'space' && e.code === 'Space')) triggerJump();
         });
-        window.addEventListener('keyup', e => { keys[e.key.toLowerCase()] = false; });
+        window.addEventListener('keyup', e => { 
+            keys[e.key.toLowerCase()] = false; 
+            if (e.code === 'Space') keys['space'] = false;
+        });
 
         let camYaw = 0;
         let isMouseDown = false;
@@ -744,10 +1026,12 @@
                     document.getElementById('result-title').innerText = "VƯỢT QUA ĐÊM " + currentNight + " (BÌNH MINH)!";
                     document.getElementById('result-desc').innerText = `Tuyệt vời! Bạn giữ sáng ${litCount}/${lanterns.length} ngọn đèn đến bình minh! Điểm Đêm này: ${currentNightScore}. Tổng điểm: ${cumulativeScore}`;
                     document.getElementById('btn-next-night').style.display = "inline-block";
+                    document.getElementById('lb-record-box').style.display = "none";
                 } else {
                     document.getElementById('result-title').innerText = "BÌNH MINH ĐÃ TỚI! CHIẾN THẮNG TRỌN VẸN!";
                     document.getElementById('result-desc').innerText = `Chúc mừng Mây! Bạn đã giữ trọn vẹn ánh sáng qua cả 3 Đêm. Tổng điểm chung cuộc: ${cumulativeScore}!`;
                     document.getElementById('btn-next-night').style.display = "none";
+                    document.getElementById('lb-record-box').style.display = "block";
                 }
                 document.getElementById('modal-result').style.display = "flex";
             } else {
@@ -761,6 +1045,7 @@
             document.getElementById('result-title').innerText = "BẠN ĐÃ THUA";
             document.getElementById('result-desc').innerText = reason === 'dawn' ? "Trời đã sáng nhưng số đèn sáng không đạt yêu cầu 60%!" : "Bạn đã cạn kiệt Ngọn Lửa sinh lực!";
             document.getElementById('btn-next-night').style.display = "none";
+            document.getElementById('lb-record-box').style.display = "block";
             document.getElementById('modal-result').style.display = "flex";
         }
 
@@ -893,12 +1178,12 @@
                 if (charmTimer > 0) charmTimer = Math.max(0, charmTimer - dt);
                 if (invulnTimer > 0) invulnTimer -= dt;
 
-                // Player Movement
+                // Player Movement with Rebound Keys
                 let moveX = 0, moveZ = 0;
-                if (keys['w']) moveZ += 1;
-                if (keys['s']) moveZ -= 1;
-                if (keys['a']) moveX += 1;
-                if (keys['d']) moveX -= 1;
+                if (keys[keyBinds.up] || keys['arrowup']) moveZ += 1;
+                if (keys[keyBinds.down] || keys['arrowdown']) moveZ -= 1;
+                if (keys[keyBinds.left] || keys['arrowleft']) moveX += 1;
+                if (keys[keyBinds.right] || keys['arrowright']) moveX -= 1;
 
                 if (isDashing) {
                     playerGroup.position.x += dashDir[0] * 14.0 * dt;
@@ -1001,13 +1286,33 @@
                 });
 
                 updateHUD();
+
+                // Visual Subtitles / Warning Indicators (Accessibility)
+                if (subtitlesEnabled) {
+                    const subEl = document.getElementById('visual-subtitles');
+                    let dangerMsg = "";
+                    const nearShade = shades.some(s => s.stunnedTimer <= 0 && Math.hypot(playerGroup.position.x - s.mesh.position.x, playerGroup.position.z - s.mesh.position.z) <= 6.0);
+                    const dyingLantern = lanterns.some(l => l.lit && l.fuel < 25.0);
+                    if (nearShade) {
+                        dangerMsg = "⚠ CẢNH BÁO: BÓNG MỰC ĐANG ÁP SÁT!";
+                    } else if (dyingLantern) {
+                        dangerMsg = "⚠ CẢNH BÁO: ĐÈN LỒNG SẮP CẠN DẦU!";
+                    }
+                    if (dangerMsg) {
+                        subEl.innerText = dangerMsg;
+                        subEl.style.display = 'block';
+                    } else {
+                        subEl.style.display = 'none';
+                    }
+                }
             }
 
-            // Camera follow player smoothly
+            // Camera follow player smoothly (Reduced Motion check)
             const camTargetX = playerGroup.position.x + Math.sin(camYaw) * 14;
             const camTargetZ = playerGroup.position.z + Math.cos(camYaw) * 14;
             const camTargetY = playerGroup.position.y + 10;
-            camera.position.lerp(new THREE.Vector3(camTargetX, camTargetY, camTargetZ), 0.1);
+            const lerpFactor = reducedMotion ? 0.05 : 0.1;
+            camera.position.lerp(new THREE.Vector3(camTargetX, camTargetY, camTargetZ), lerpFactor);
             camera.lookAt(playerGroup.position.x, playerGroup.position.y + 1.2, playerGroup.position.z);
 
             renderer.render(scene, camera);

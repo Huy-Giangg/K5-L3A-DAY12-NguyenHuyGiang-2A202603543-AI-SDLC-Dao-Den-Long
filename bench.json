@@ -1,0 +1,12 @@
+{
+  "contract_version": "1.3",
+  "avg_fps": 183.8,
+  "p1_low_fps": 152.0,
+  "frame_ms_p95": 5.9,
+  "frames": 5515,
+  "load_ms": 0,
+  "peak_mem_mb": 26,
+  "vsync_off": true,
+  "renderer": "Simulation Core Engine (60-144Hz) / WebGL Three.js r128",
+  "os": "Windows 10 (AMD64)"
+}

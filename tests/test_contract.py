@@ -8,7 +8,7 @@ def test_contract_json_schema():
     assert os.path.exists("game.contract.json")
     with open("game.contract.json", "r", encoding="utf-8") as f:
         data = json.load(f)
-    assert data["contract_version"] in ["1.0", "1.1", "1.2"]
+    assert data["contract_version"] in ["1.0", "1.1", "1.2", "1.3"]
     assert "tuning" in data
     tuning = data["tuning"]
     assert tuning["lantern_count_night1"] == 5

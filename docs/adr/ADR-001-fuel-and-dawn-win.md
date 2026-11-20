@@ -55,3 +55,4 @@ Kết quả playtest cho thấy: Người chơi thành thạo có thể thắp h
 - **Các thay đổi phá vỡ tương thích (Breaking Changes):**
   - Schema Test Contract nâng cấp lên v1.2.
   - Kịch bản test cũ mong đợi `all_lit` thắng sớm phải được cập nhật lại theo điều kiện bình minh `dawn_survived`.
+
