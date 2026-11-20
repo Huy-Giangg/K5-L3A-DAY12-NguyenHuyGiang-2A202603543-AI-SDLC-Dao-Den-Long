@@ -14,16 +14,15 @@ def load_json_file(file_path: str) -> Any:
         sys.exit(2)
 
 def run_headless(args_list: Optional[List[str]] = None) -> int:
-    # If called with no arguments at all, output status OK for health checks
     if args_list is None:
         args_list = sys.argv[1:]
     if len(args_list) == 0:
         print("STATUS: OK - Headless mode running successfully.")
         return 0
 
-    parser = argparse.ArgumentParser(description="Dao Den Long Headless Runner (Contract v1.0)")
+    parser = argparse.ArgumentParser(description="Dao Den Long Headless Runner (Contract v1.1)")
     parser.add_argument("--seed", type=int, default=42, help="RNG seed")
-    parser.add_argument("--night", type=int, default=1, help="Night level (default: 1)")
+    parser.add_argument("--night", type=int, default=1, choices=[1, 2, 3], help="Night level (1, 2, 3)")
     parser.add_argument("--scenario", type=str, default=None, help="Scenario json file path")
     parser.add_argument("--inputs", type=str, default=None, help="Inputs json file path")
     parser.add_argument("--ticks", type=int, required=True, help="Number of ticks to simulate")
@@ -81,9 +80,9 @@ def run_headless(args_list: Optional[List[str]] = None) -> int:
                     tuning.per_second_left_score = sc.get("per_second_left", tuning.per_second_left_score)
                     tuning.per_flame_left_score = sc.get("per_flame_left", tuning.per_flame_left_score)
     except Exception:
-        pass # fallback to default Tuning
+        pass
 
-    engine = SimulationEngine(seed=parsed_args.seed, tuning=tuning)
+    engine = SimulationEngine(seed=parsed_args.seed, tuning=tuning, night=parsed_args.night)
     if scenario_data:
         engine.apply_scenario(scenario_data)
 
@@ -93,11 +92,20 @@ def run_headless(args_list: Optional[List[str]] = None) -> int:
     snap0 = engine.get_snapshot()
     out_lines.append(json.dumps(snap0, separators=(',', ':')))
 
+    # night_start event at beginning
+    event_night_start = {
+        "type": "event",
+        "tick": 0,
+        "name": "night_start",
+        "data": {"night": parsed_args.night}
+    }
+    out_lines.append(json.dumps(event_night_start, separators=(',', ':')))
+
     total_ticks = parsed_args.ticks
     snap_interval = parsed_args.snapshot_every
 
     for k in range(total_ticks):
-        if engine.state != "playing":
+        if engine.state in ["won", "lost"]:
             break
 
         # Check if input exists for tick k
@@ -118,11 +126,11 @@ def run_headless(args_list: Optional[List[str]] = None) -> int:
     out_lines.append(json.dumps(engine.get_end_record(), separators=(',', ':')))
 
     try:
-        with open(parsed_args.out, "w", encoding="utf-8") as f:
+        with open(parsed_args.out, "w", encoding="utf-8") as f_out:
             for line in out_lines:
-                f.write(line + "\n")
+                f_out.write(line + "\n")
     except Exception as e:
-        sys.stderr.write(f"Error writing output to {parsed_args.out}: {e}\n")
-        return 1
+        sys.stderr.write(f"Error writing output file {parsed_args.out}: {e}\n")
+        sys.exit(1)
 
     return 0

@@ -61,12 +61,19 @@ def test_pulse_stuns_and_pushes_shades():
     assert engine.player.carried == 1
     assert engine.shades[0].state == "stunned"
     assert engine.shades[0].stun_timer > 0
-    assert engine.shades[0].pos[2] >= 5.0 # pushed back
-    assert engine.shades[1].state == "chase" # unaffected
 
     pulse_event = next(e for e in engine.events_this_tick if e["name"] == "pulse")
     assert "S1" in pulse_event["data"]["stunned_ids"]
     assert "S2" not in pulse_event["data"]["stunned_ids"]
+
+    # Ticket-02 spec: pulse push is distributed over 15 ticks instead of instant.
+    # After 1 step, push has started:
+    assert engine.shades[0].pos[2] > 2.0
+    # Simulate remaining 14 ticks of push:
+    for _ in range(14):
+        engine.step()
+    assert engine.shades[0].pos[2] >= 4.9 # Total push completes over 15 ticks
+    assert engine.shades[1].state == "chase" # unaffected
 
 def test_player_hit_and_invulnerability():
     tuning = Tuning(invuln_s=2.0, hit_drop_ratio=0.5, shade_hit_radius=1.0)
